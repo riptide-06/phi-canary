@@ -350,6 +350,7 @@ def results_payload() -> dict:
         "table_md": tbl.read_text() if tbl.exists() else "",
         "report_available": rep.exists(),
         "report_bytes": rep.stat().st_size if rep.exists() else 0,
+        "report_path": str(rep),
         "channels": CHANNELS, "variants": VARIANTS, "caveats": CAVEATS,
         "setup": cfg.as_dict(), "fingerprint": cfg.fingerprint(),
         "model_order": analyze.MODEL_ORDER,
@@ -522,9 +523,12 @@ class App:
         self.started = time.time()
 
 
+# Forbids every external resource, which is also the proof of the no-CDN/no-webfont
+# constraint. frame-src 'self' is there for one thing only: the RESULTS view embeds the
+# real results/report.html, same-origin, so what you see is the shipped artifact.
 CSP = ("default-src 'none'; base-uri 'none'; form-action 'none'; "
        "style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; "
-       "font-src local; connect-src 'self'")
+       "font-src local; connect-src 'self'; frame-src 'self'")
 
 
 class Handler(BaseHTTPRequestHandler):

@@ -201,6 +201,11 @@ tr:last-child td{border-bottom:none}
 .caveat{border-left:3px solid var(--amber);background:var(--amber-bg);color:#E8CFA0;
   padding:11px 14px;font-size:13.5px;line-height:1.55}
 .panel .big.bad{color:var(--red)}
+/* ── results ───────────────────────────────────────────────────────────── */
+#repWrap{border:1px solid var(--line);background:#0B0D10;height:68vh;min-height:420px}
+#repFrame{width:100%;height:100%;border:0;display:block}
+details summary{cursor:pointer;font-size:13px;padding:6px 0}
+#provLine b{color:#EAFFF0}
 #toast{position:fixed;right:20px;bottom:18px;z-index:120;display:flex;flex-direction:column;
   gap:8px;align-items:flex-end}
 #toast div{border:1px solid var(--line2);background:#0C1A10;color:var(--ink);padding:9px 14px;
@@ -503,8 +508,35 @@ tr:last-child td{border-bottom:none}
 
     <!-- ══ RESULTS ═════════════════════════════════════════════════════ -->
     <section class=view id=view-results hidden>
-      <h1>RESULTS</h1>
-      <div class=stub>&mdash; next commit &mdash;</div>
+      <div class=demohead>
+        <h1>RESULTS</h1>
+        <div class=row>
+          <button class=btn id=rDownload>&#8659; DOWNLOAD report.html</button>
+          <button class=btn id=rRegen>&#8635; REGENERATE</button>
+          <button class=btn id=rAgain>&#9654; RUN AGAIN</button>
+        </div>
+      </div>
+
+      <div class=panel id=provPanel>
+        <span class=lbl>setup provenance</span>
+        <div id=provLine class=mut>&hellip;</div>
+        <div class=help style="margin-top:8px">A number without its setup is not
+          interpretable: which agent produced it, which tool names were actually scored,
+          and whether verify ever passed.</div>
+      </div>
+
+      <div class=panel>
+        <span class=lbl>results/report.html &mdash; the shipped artifact, inline</span>
+        <div id=repWrap>
+          <iframe id=repFrame title="phi-canary report"></iframe>
+        </div>
+        <div class=help style="margin-top:8px" id=repMeta></div>
+      </div>
+
+      <details>
+        <summary class=mut>results/table.md</summary>
+        <div class=panel style="margin-top:10px"><pre id=tableMd class=mut></pre></div>
+      </details>
     </section>
 
   </main>
@@ -1425,6 +1457,82 @@ onEnter.demo = async (opts) => {
     startTimeline(true);
   }
 };
+
+/* ═══ RESULTS ═══════════════════════════════════════════════════════════════
+   The report is embedded same-origin rather than re-implemented, so what is on
+   screen is the artifact that ships, provenance line and all.              */
+let RESULTS = null;
+
+function renderProvenance(r){
+  const pv = r.provenance || {};
+  const ad = pv.adapter || {};
+  const models = ad.models || (ad.model ? [ad.model] : []);
+  const bits = [];
+  bits.push("adapter <b>" + (ad.name || (r.setup && r.setup.adapter) || "?") + "</b>"
+    + (models.length ? " &middot; " + models.join(", ") : ""));
+  bits.push("egress tools scored <code>"
+    + ((pv.egress_tools || (r.setup && r.setup.egress_tools) || []).join(", ") || "none") + "</code>");
+  bits.push("attacker host <code>"
+    + (pv.attacker_host || (r.setup && r.setup.attacker_host) || "?") + "</code>");
+  bits.push("verify: " + (pv.verified && !pv.forced
+    ? "<b class=ok>passed</b>" + (pv.verify_ts_utc ? " " + pv.verify_ts_utc : "")
+    : "<b class=bad>NOT passed</b>"));
+  bits.push("setup <code>" + (pv.config_fingerprint || r.fingerprint || "?") + "</code>");
+  $("#provLine").innerHTML = bits.join(" &nbsp;&middot;&nbsp; ");
+  $("#provPanel").className = "panel" + ((pv.forced || pv.verified === false) ? " hot" : "");
+}
+
+function loadReportFrame(){
+  const f = $("#repFrame");
+  f.src = "/api/report?token=" + encodeURIComponent(PHI.token) + "&t=" + (RESULTS
+    ? RESULTS.report_bytes : 0) + "_" + ($("#repFrame").dataset.n = String(
+      Number($("#repFrame").dataset.n || 0) + 1));
+}
+
+async function loadResults(){
+  try{
+    RESULTS = await api("/api/results");
+    renderProvenance(RESULTS);
+    $("#tableMd").textContent = RESULTS.table_md || "(no table yet)";
+    if (RESULTS.report_available){
+      loadReportFrame();
+      $("#repMeta").textContent = Math.round(RESULTS.report_bytes/1024) + " KB, "
+        + "fully self-contained (CSS, figure and data inlined) — " + RESULTS.report_path;
+      $("#rDownload").disabled = false;
+    }else{
+      $("#repMeta").textContent = "no report on disk yet — press REGENERATE";
+      $("#rDownload").disabled = true;
+    }
+  }catch(e){ toast("results failed: " + e.message, true); }
+}
+onEnter.results = loadResults;
+
+$("#rRegen").addEventListener("click", async () => {
+  $("#rRegen").disabled = true;
+  try{
+    const r = await api("/api/report", {json:{}});
+    toast("regenerated report.html (" + Math.round(r.bytes/1024) + " KB)");
+    await loadResults();
+  }catch(e){ toast(e.message, true); }
+  finally{ $("#rRegen").disabled = false; }
+});
+
+$("#rDownload").addEventListener("click", async () => {
+  try{
+    const r = await api("/api/report", {raw:true});
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const url = URL.createObjectURL(await r.blob());
+    const a = el("a"); a.href = url; a.download = "phi-canary-report.html";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    /* A native webview may not surface a save dialog, so always name the file on disk:
+       an offer that silently does nothing is worse than no offer. */
+    toast("saved to your downloads — the original is at " + (RESULTS && RESULTS.report_path));
+  }catch(e){ toast("download failed: " + e.message + " — the file is at "
+    + (RESULTS && RESULTS.report_path), true); }
+});
+
+$("#rAgain").addEventListener("click", () => show("demo", {}));
 
 /* ═══ boot ══════════════════════════════════════════════════════════════════ */
 (function(){
