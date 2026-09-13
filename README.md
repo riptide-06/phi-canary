@@ -9,6 +9,21 @@ uvx --from . phi-canary demo         # offline cached replay — 0 API calls, ~3
 # or, in a checkout:  python3 demo.py
 ```
 
+### Or open the overlay
+
+```bash
+pip install 'phi-canary[overlay]'   # pywebview; without it the overlay uses your browser
+phi-canary open                     # boot sequence, then a native window
+```
+
+`phi-canary open` is the demo surface: a terminal boot sequence, then a real window with
+five views — STATUS, SETUP, VERIFY, DEMO/RUN, RESULTS. The DEMO view replays one cached
+episode as a paced six-stage reveal (the setup, the injected content, the agent's tool
+calls, the deliberate beat before the egress call, the verdict, then the 32-cell matrix
+and the results) with PLAY / PAUSE / SKIP / REPLAY, 0.5x–2x, space and escape bound.
+It is all **cached replay — 0 API calls**, works with no keys, and says so on screen:
+the pacing is a presentation choice, not a computation. The bridge binds 127.0.0.1 only.
+
 `demo`, `report`, and `doctor` ship with cached results and need **no API keys**. Other commands:
 
 ```bash
@@ -17,6 +32,7 @@ phi-canary doctor    # which provider keys are live, with signup URLs (exits 0)
 phi-canary run       # run the study live (needs keys); auto-resumes from cache
 phi-canary init      # scaffold an adapter + phi-canary.yaml for YOUR agent
 phi-canary verify    # 4 checks on your setup; run refuses to score until they pass
+phi-canary open      # the native overlay (add --browser to force browser mode)
 ```
 
 > `uvx phi-canary` works once published to PyPI. Until then use `uvx --from . phi-canary …`,
@@ -221,6 +237,7 @@ your adapter and `phi-canary.yaml` are the only things that change.
 | `src/adapters/base.py` | `AgentAdapter` interface + reference impl + loader |
 | `src/config.py` · `src/scoring.py` | `phi-canary.yaml` (the trust boundary as config) + config-aware policy over the frozen oracle |
 | `src/verify.py` · `src/scaffold.py` | the four setup checks + receipts/provenance · `init` templates |
+| `src/overlay.py` · `src/web/app.html` | `phi-canary open` — boot sequence + local bridge · the single-file overlay (no framework, no build step, no CDN) |
 | `payloads/` | 16 injection payloads (4 channels × 4 variants) |
 | `paper/` | methods, results skeleton, limitations |
 | `results/` | `raw.jsonl`, `table.md`, `figure.png`, `report.html`, `provenance.json`, `verify/` |
