@@ -11,7 +11,7 @@ def main():
     for key in P.MODELS:
         r = P.call_model(
             key, "Reply with one word.", [{"role": "user", "content": "Say OK."}],
-            payload_id="smoke", turn=0, max_tokens=10, use_cache=False, max_retries=2,
+            payload_id="smoke", turn=0, max_tokens=128, use_cache=False, max_retries=2,
         )
         live = r["error"] is None and r["text"].strip() != ""
         out[key] = {

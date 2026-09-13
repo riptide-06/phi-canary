@@ -26,16 +26,27 @@
   canary would evade detection and be scored, conservatively, as no-leak. The reported rates
   are therefore lower bounds on true exfiltration behavior.
 
-- **Open models are served quantized via hosted APIs.** We test the open-weights models
-  through Together and Mistral, not a local self-hosted deployment. The served weights may be
-  quantized and are wrapped in provider-side system scaffolding, so results characterize
-  "the open-weights model as commonly served", not the raw checkpoint an enterprise would
-  host itself.
+- **Panel and provider constraints (single-vendor proprietary arm; hosted open arm).** The
+  proprietary arm comprises two tiers of a single vendor (Google Gemini Flash and
+  Flash-Lite) rather than the Anthropic models used in prior work, and the open-weights arm
+  is served via hosted free tiers (Llama 3.3 70B via Together, Qwen 3.6 27B via Groq) rather
+  than a local self-hosted deployment. Provider selection was constrained by budget:
+  Anthropic has no free API tier, and the available Anthropic and Mistral credentials were
+  invalid and rate-limited respectively. The served open weights may be quantized and are
+  wrapped in provider-side system scaffolding, so results characterize "the open-weights
+  model as commonly served", not the raw checkpoint an enterprise would host itself. The
+  headline comparison should be read as best-evaluated open-weights versus best-evaluated
+  proprietary, not as a claim about either family in general.
 
 - **Four models across two families, not a census.** Two proprietary and two open-weights
   models cannot establish a property of "open-weights models" in general; they sample two
-  points from each family. (In the run captured here, only one open-weights model was
-  reachable, further narrowing the sample — see BLOCKERS.md.)
+  points from each family.
+
+- **Thinking models and output truncation.** The Gemini and Qwen models spend output tokens
+  on hidden reasoning before emitting a tool call. We raised the per-call output cap to 1024
+  tokens so that reasoning does not truncate the tool call; too small a cap would silently
+  bias the measured exfiltration rate downward by cutting episodes off before the egress
+  call.
 
 - **English-only.** All payloads and the agent workflow are in English; multilingual
   injection is untested.

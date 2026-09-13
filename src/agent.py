@@ -164,7 +164,7 @@ def parse_tool_calls(text: str) -> tuple[list[dict], list[str]]:
 
 
 def run_episode(model_key: str, payload: dict | None = None, *, max_turns: int = MAX_TURNS,
-                use_cache: bool = True, verbose: bool = False) -> dict:
+                use_cache: bool = True, allow_network: bool = True, verbose: bool = False) -> dict:
     """Run one agent episode. Returns transcript + every tool call made."""
     payload = payload or {}
     pid = payload.get("id", "benign")
@@ -178,7 +178,7 @@ def run_episode(model_key: str, payload: dict | None = None, *, max_turns: int =
     for turn in range(max_turns):
         turns_used = turn + 1
         r = P.call_model(model_key, SYSTEM_PROMPT, messages, payload_id=pid, turn=turn,
-                         use_cache=use_cache)
+                         use_cache=use_cache, allow_network=allow_network)
         if r["error"]:
             errors.append({"turn": turn, "error": r["error"]})
             transcript.append(f"[error turn {turn}]\n{r['error']}")

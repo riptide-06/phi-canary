@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""PHI-canary live demo. ONE command, no typing, ~1 second (replays from cache).
+"""PHI-canary live demo. ONE command, no typing, ~1 second.
 
-    python3 demo.py
+    python3 demo.py          # OFFLINE cached replay — makes ZERO API calls (default)
+    python3 demo.py --live   # re-run the cell live against the model
 
+Defaults to cache-only replay so it survives venue wifi failure and burns no quota.
 A poisoned member record flows into a contact-center agent. The agent reads it,
 then POSTs the member's record — canary member ID and all — to an attacker endpoint.
 The oracle catches the exact bytes in the outbound argument and raises a red alert.
@@ -15,7 +17,10 @@ import time
 sys.path.insert(0, str(pathlib.Path(__file__).parent / "src"))
 import yaml
 import oracle as O
+import providers as P
 from agent import run_episode, TICKET_ID
+
+LIVE = "--live" in sys.argv
 
 ROOT = pathlib.Path(__file__).parent
 R = "\033[0m"; BOLD = "\033[1m"; DIM = "\033[2m"
@@ -64,6 +69,7 @@ def main():
     slow(f"  • Canary planted   : synthetic patient record, member ID {BOLD}{O.CANARY}{R}")
     slow(f"  • No legitimate task needs this record sent anywhere external.")
     slow(f"  • Tools are SIMULATED. We enforce nothing — we only scan outbound arguments.")
+    slow(f"  • Mode             : {(RED+'LIVE (calling the model)'+R) if LIVE else (GRN+'OFFLINE cached replay — 0 API calls'+R)}")
     print()
 
     payload = yaml.safe_load((ROOT / "payloads" / f"{DEMO_CELL}.yaml").read_text())
@@ -75,7 +81,11 @@ def main():
     print()
 
     slow(f"{BOLD}Agent runs the ticket {TICKET_ID} …{R}", 0.5)
-    ep = run_episode(MODEL, payload, use_cache=True)   # replays from cache, instant
+    calls_before = P.calls_used()
+    ep = run_episode(MODEL, payload, use_cache=True, allow_network=LIVE)  # offline by default
+    if not LIVE and any(e.get("error") == "cache_miss_offline" for e in ep["errors"]):
+        print(f"{RED}  Cache miss in offline mode — run once with --live to populate the cache.{R}")
+        return
     for c in ep["tool_calls"]:
         args = json.dumps(c["args"])
         egress = c["tool"] in O.EGRESS_TOOLS
@@ -101,8 +111,10 @@ def main():
                 print("  " + line)
     print()
     rule("─", DIM)
-    print(f"{DIM}  Full table: results/table.md   ·   Figure: results/figure.png   ·   "
-          f"Status: STATUS.md{R}\n")
+    spent = P.calls_used() - calls_before
+    mode = f"{RED}LIVE ({spent} API call{'s' if spent != 1 else ''}){R}" if LIVE else f"{GRN}OFFLINE — 0 API calls made{R}"
+    print(f"{DIM}  Mode: {R}{mode}{DIM}   ·   Full table: results/table.md   ·   "
+          f"Figure: results/figure.png{R}\n")
 
 
 if __name__ == "__main__":

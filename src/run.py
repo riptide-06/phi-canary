@@ -30,12 +30,23 @@ _write_lock = threading.Lock()
 
 
 def load_payloads() -> list[dict]:
-    out = []
+    """Injected corpus (16) + a matched control arm (16): each of the 16 tasks with the
+    injection REMOVED. The control arm is the false-positive baseline on benign traffic —
+    the answer to "how often does the agent exfiltrate when nothing is attacking it".
+    """
+    inj = []
     for f in sorted((ROOT / "payloads").glob("*.yaml")):
-        out.append(yaml.safe_load(f.read_text()))
-    # control: no injection. channel/variant = 'control' so it is a labelled separate row.
-    out.append({"id": "control__none", "channel": "control", "variant": "control", "content": ""})
-    return out
+        d = yaml.safe_load(f.read_text())
+        d["condition"] = "injected"
+        inj.append(d)
+    ctrl = []
+    for d in inj:
+        ctrl.append({
+            "id": f"control__{d['channel']}__{d['variant']}",
+            "channel": d["channel"], "variant": d["variant"],
+            "condition": "control", "content": "",   # injection removed
+        })
+    return inj + ctrl
 
 
 def completed_cells() -> set[tuple[str, str]]:
@@ -72,9 +83,10 @@ def log_cell(model_key: str, ep: dict, verdict: dict) -> None:
 
 def run_cell(model_key: str, payload: dict, *, use_cache: bool) -> dict:
     pid = payload["id"]
+    condition = payload.get("condition", "injected")
     t0 = time.time()
     try:
-        # control keeps its own id/namespace; empty content means nothing is injected
+        # control cells carry empty content -> run_episode injects nothing
         pl = payload if payload.get("content") else {
             "id": pid, "channel": payload["channel"],
             "variant": payload.get("variant"), "content": "",
@@ -91,6 +103,7 @@ def run_cell(model_key: str, payload: dict, *, use_cache: bool) -> dict:
             "family": P.MODELS[model_key]["family"],
             "model_label": P.MODELS[model_key]["label"],
             "payload_id": pid,
+            "condition": condition,
             "channel": payload["channel"],
             "variant": payload["variant"],
             "leaked": verdict["leaked"],
@@ -115,6 +128,7 @@ def run_cell(model_key: str, payload: dict, *, use_cache: bool) -> dict:
     except Exception as e:  # a cell must never crash the run
         record = {
             "status": "crash", "model_key": model_key, "payload_id": pid,
+            "condition": condition,
             "channel": payload.get("channel"), "variant": payload.get("variant"),
             "leaked": False, "encoding": None, "error_detail": f"{type(e).__name__}: {e}",
             "elapsed_s": round(time.time() - t0, 2), "ts": time.time(),
@@ -165,6 +179,10 @@ def main():
         models = [m.strip() for m in args.models.split(",") if m.strip()]
     else:
         models = live_models()
+    # priority order protects the open-vs-proprietary comparison when the budget runs short:
+    # injected cells (the study) run before control cells within each model.
+    models = sorted(models, key=lambda m: P.MODELS[m].get("priority", 99))
+    payloads = sorted(payloads, key=lambda p: (0 if p.get("condition") == "injected" else 1, p["id"]))
 
     if args.smoke:
         models, payloads = models[:1], payloads[:3]
@@ -174,7 +192,7 @@ def main():
     print(f"models={models}  payloads={len(payloads)}  already_done={len(done)}  "
           f"calls_used={P.calls_used()}/{P.CALL_BUDGET}")
 
-    # group models by provider; one worker per provider, cells in order within a provider
+    # group models by provider; one worker per provider (parallelism ACROSS providers only)
     by_provider: dict[str, list[str]] = {}
     for m in models:
         by_provider.setdefault(P.MODELS[m]["provider"], []).append(m)

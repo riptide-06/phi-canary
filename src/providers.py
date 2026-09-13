@@ -1,10 +1,19 @@
 """Provider shims. No SDKs, no agent frameworks: raw HTTP via httpx.
 
-Every response is cached to disk keyed by (model, payload_id, turn) so the run
-survives suspend/resume. Call budget is tracked in results/api_calls.json.
+Panel (CONSOLIDATED AMENDMENT — free tier, no credit card):
+  proprietary : gemini-3-flash-preview, gemini-3.1-flash-lite   (Google AI Studio)
+  open-weights: llama-3.3-70b (Together, ALREADY CACHED — kept), qwen3.6-27b (Groq)
+
+Every response is cached to disk keyed by (model, payload_id, turn); payload_id encodes
+the condition (injected vs control), so cache never collides across conditions. The runner
+is idempotent: --resume replays completed cells with ZERO network calls.
+
+Rate limiting is a per-provider token bucket (tokens/min AND requests/min). The binding
+constraint is Groq's ~6,000 TPM. Parallelism is ACROSS providers only.
 """
 from __future__ import annotations
 
+import collections
 import hashlib
 import json
 import os
@@ -18,8 +27,16 @@ import httpx
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CACHE = ROOT / "cache"
 RESULTS = ROOT / "results"
-CALL_BUDGET = 1000
+CALL_BUDGET = 400            # AMENDMENT cap (83 already used before the amendment)
+DEFAULT_MAX_TOKENS = 1024     # raised from AMENDMENT 300: Gemini/Qwen are thinking models; 300 truncates before the tool call (measurement bug). Call COUNT and the 400-call cap are unaffected.
 _lock = threading.Lock()
+
+SIGNUP_URLS = {
+    "google": "https://aistudio.google.com/apikey",
+    "groq": "https://console.groq.com/keys",
+    "together": "https://api.together.xyz/settings/api-keys",
+    "openrouter": "https://openrouter.ai/keys",
+}
 
 
 def load_env() -> None:
@@ -36,43 +53,42 @@ def load_env() -> None:
 
 load_env()
 
-# family: "proprietary" (API-only) vs "open_weights" (self-hostable)
+# family: "proprietary" (API-only) vs "open_weights" (self-hostable).
+# priority: lower runs first; protects the open-vs-proprietary comparison under the cap.
+# NOTE: gemini-3-flash-preview was dropped — its free tier is 20 requests PER DAY
+# (GenerateRequestsPerDayPerProjectPerModel-FreeTier), unusable for a multi-turn agent and
+# exhausted on 2026-09-13. Proprietary arm is gemini-3.1-flash-lite (high daily quota).
 MODELS = {
-    "claude-sonnet-5": {
-        "provider": "anthropic",
-        "api_model": "claude-sonnet-5",
-        "family": "proprietary",
-        "label": "Claude Sonnet 5",
-    },
-    "claude-haiku-4-5": {
-        "provider": "anthropic",
-        "api_model": "claude-haiku-4-5-20251001",
-        "family": "proprietary",
-        "label": "Claude Haiku 4.5",
+    "gemini-3.1-flash-lite": {
+        "provider": "google", "api_model": "gemini-3.1-flash-lite",
+        "family": "proprietary", "label": "Gemini 3.1 Flash-Lite", "priority": 0,
     },
     "llama-3.3-70b": {
-        "provider": "together",
-        "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
-        "family": "open_weights",
-        "label": "Llama 3.3 70B",
+        "provider": "together", "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+        "family": "open_weights", "label": "Llama 3.3 70B", "priority": 1,
     },
-    "mistral-small-4": {
-        "provider": "mistral",
-        "api_model": "mistral-small-latest",
-        "family": "open_weights",
-        "label": "Mistral Small 4",
+    "qwen3.6-27b": {
+        "provider": "groq", "api_model": "qwen/qwen3.6-27b",
+        "family": "open_weights", "label": "Qwen 3.6 27B", "priority": 2,
     },
 }
 
 ENDPOINTS = {
-    "anthropic": "https://api.anthropic.com/v1/messages",
     "together": "https://api.together.xyz/v1/chat/completions",
-    "mistral": "https://api.mistral.ai/v1/chat/completions",
+    "groq": "https://api.groq.com/openai/v1/chat/completions",
+    # google is built per-model (model name in the path)
 }
 KEY_NAMES = {
-    "anthropic": "ANTHROPIC_API_KEY",
+    "google": "GOOGLE_API_KEY",
+    "groq": "GROQ_API_KEY",
     "together": "TOGETHER_API_KEY",
-    "mistral": "MISTRAL_API_KEY",
+}
+
+# Per-provider rate limits (requests/min, tokens/min). Groq TPM is the binding constraint.
+RATE_LIMITS = {
+    "google": {"rpm": 8, "tpm": 250_000},
+    "groq": {"rpm": 25, "tpm": 6_000},
+    "together": {"rpm": 30, "tpm": 120_000},
 }
 
 
@@ -80,7 +96,50 @@ class ProviderError(RuntimeError):
     """Non-retryable provider failure (auth, bad request, dead model)."""
 
 
-# ---------------------------------------------------------------- call budget
+# ----------------------------------------------------------------- rate limiter
+class RateLimiter:
+    """Sliding-window token bucket over both requests and tokens per 60s."""
+
+    def __init__(self, rpm: int, tpm: int):
+        self.rpm, self.tpm = rpm, tpm
+        self.reqs: collections.deque = collections.deque()          # timestamps
+        self.toks: collections.deque = collections.deque()          # (ts, tokens)
+        self.lock = threading.Lock()
+
+    def acquire(self, est_tokens: int) -> float:
+        est_tokens = min(est_tokens, self.tpm)                       # never block forever
+        waited = 0.0
+        while True:
+            with self.lock:
+                now = time.time()
+                while self.reqs and now - self.reqs[0] > 60:
+                    self.reqs.popleft()
+                while self.toks and now - self.toks[0][0] > 60:
+                    self.toks.popleft()
+                cur = sum(t for _, t in self.toks)
+                if len(self.reqs) < self.rpm and cur + est_tokens <= self.tpm:
+                    self.reqs.append(now)
+                    self.toks.append((now, est_tokens))
+                    return waited
+                waits = []
+                if len(self.reqs) >= self.rpm:
+                    waits.append(60 - (now - self.reqs[0]))
+                if cur + est_tokens > self.tpm and self.toks:
+                    waits.append(60 - (now - self.toks[0][0]))
+                wait = max(0.2, min(waits)) if waits else 0.2
+            time.sleep(wait)
+            waited += wait
+
+
+_LIMITERS = {p: RateLimiter(v["rpm"], v["tpm"]) for p, v in RATE_LIMITS.items()}
+
+
+def est_tokens(system: str, messages: list[dict], max_tokens: int) -> int:
+    chars = len(system) + sum(len(m["content"]) for m in messages)
+    return chars // 4 + max_tokens
+
+
+# ------------------------------------------------------------------ call budget
 def _budget_path() -> pathlib.Path:
     RESULTS.mkdir(parents=True, exist_ok=True)
     return RESULTS / "api_calls.json"
@@ -103,10 +162,9 @@ def _bump_calls() -> int:
         return n
 
 
-# --------------------------------------------------------------------- cache
+# ------------------------------------------------------------------------ cache
 def cache_key(model_key: str, payload_id: str, turn: int) -> str:
-    safe = "".join(c if c.isalnum() or c in "-._" else "_" for c in f"{model_key}__{payload_id}__t{turn}")
-    return safe
+    return "".join(c if c.isalnum() or c in "-._" else "_" for c in f"{model_key}__{payload_id}__t{turn}")
 
 
 def cache_read(model_key: str, payload_id: str, turn: int, prompt_hash: str):
@@ -118,7 +176,7 @@ def cache_read(model_key: str, payload_id: str, turn: int, prompt_hash: str):
     except Exception:
         return None
     if blob.get("prompt_hash") != prompt_hash:
-        return None  # conversation diverged; recompute
+        return None
     return blob
 
 
@@ -140,35 +198,44 @@ def hash_prompt(system: str, messages: list[dict]) -> str:
     return h.hexdigest()[:32]
 
 
-# ---------------------------------------------------------------------- call
-def _build(provider: str, api_model: str, system: str, messages: list[dict], max_tokens: int, temperature: float):
+# ------------------------------------------------------------------- transport
+def _build(provider: str, api_model: str, system: str, messages: list[dict],
+           max_tokens: int, temperature: float):
     key = os.environ.get(KEY_NAMES[provider], "")
     if not key:
         raise ProviderError(f"missing {KEY_NAMES[provider]}")
-    if provider == "anthropic":
-        headers = {"x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json"}
+    if provider == "google":
+        url = (f"https://generativelanguage.googleapis.com/v1beta/models/"
+               f"{api_model}:generateContent")
+        headers = {"x-goog-api-key": key, "content-type": "application/json"}
+        contents = [{"role": "model" if m["role"] == "assistant" else "user",
+                     "parts": [{"text": m["content"]}]} for m in messages]
         body = {
-            "model": api_model,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "system": system,
-            "messages": messages,
+            "system_instruction": {"parts": [{"text": system}]},
+            "contents": contents,
+            "generationConfig": {"temperature": temperature, "maxOutputTokens": max_tokens},
         }
-    else:
-        headers = {"Authorization": f"Bearer {key}", "content-type": "application/json"}
-        body = {
-            "model": api_model,
-            "max_tokens": max_tokens,
-            "temperature": temperature,
-            "messages": [{"role": "system", "content": system}] + messages,
-        }
+        return url, headers, body
+    # OpenAI-compatible (together, groq)
+    headers = {"Authorization": f"Bearer {key}", "content-type": "application/json"}
+    body = {
+        "model": api_model, "max_tokens": max_tokens, "temperature": temperature,
+        "messages": [{"role": "system", "content": system}] + messages,
+    }
     return ENDPOINTS[provider], headers, body
 
 
-def _extract_text(provider: str, data: dict) -> str:
-    if provider == "anthropic":
-        return "".join(b.get("text", "") for b in data.get("content", []) if b.get("type") == "text")
-    return (data.get("choices") or [{}])[0].get("message", {}).get("content") or ""
+def _extract_text(provider: str, data: dict) -> tuple[str, str | None]:
+    if provider == "google":
+        cands = data.get("candidates") or []
+        if not cands:
+            return "", data.get("promptFeedback", {}).get("blockReason")
+        c = cands[0]
+        parts = c.get("content", {}).get("parts", []) or []
+        text = "".join(p.get("text", "") for p in parts)
+        return text, c.get("finishReason")
+    choice = (data.get("choices") or [{}])[0]
+    return choice.get("message", {}).get("content") or "", choice.get("finish_reason")
 
 
 def call_model(
@@ -178,12 +245,17 @@ def call_model(
     *,
     payload_id: str,
     turn: int,
-    max_tokens: int = 900,
+    max_tokens: int = DEFAULT_MAX_TOKENS,
     temperature: float = 0.0,
     use_cache: bool = True,
+    allow_network: bool = True,
     max_retries: int = 3,
 ) -> dict:
-    """Returns {text, error, cached, calls_used, finish}. Never raises on transport."""
+    """Returns {text, error, cached, finish}. Never raises on transport.
+
+    allow_network=False: cache-only replay (for the offline demo). A cache miss returns an
+    error instead of touching the network.
+    """
     spec = MODELS[model_key]
     provider, api_model = spec["provider"], spec["api_model"]
     ph = hash_prompt(system, messages)
@@ -194,38 +266,37 @@ def call_model(
             hit["cached"] = True
             return hit
 
+    if not allow_network:
+        return {"text": "", "error": "cache_miss_offline", "cached": False, "finish": None}
+
     if calls_used() >= CALL_BUDGET:
         return {"text": "", "error": "call_budget_exhausted", "cached": False, "finish": None}
 
     url, headers, body = _build(provider, api_model, system, messages, max_tokens, temperature)
+    et = est_tokens(system, messages, max_tokens)
+    backoffs = [5, 15, 45]                                   # AMENDMENT: 5/15/45 on 429
     last_err = None
     for attempt in range(max_retries):
         try:
+            _LIMITERS[provider].acquire(et)
             _bump_calls()
             with httpx.Client(timeout=120.0) as client:
                 r = client.post(url, headers=headers, json=body)
             if r.status_code == 200:
                 data = r.json()
-                rec = {
-                    "text": _extract_text(provider, data),
-                    "error": None,
-                    "cached": False,
-                    "finish": data.get("stop_reason") or (data.get("choices") or [{}])[0].get("finish_reason"),
-                    "model_key": model_key,
-                    "api_model": api_model,
-                    "usage": data.get("usage"),
-                    "ts": time.time(),
-                }
+                text, finish = _extract_text(provider, data)
+                rec = {"text": text, "error": None, "cached": False, "finish": finish,
+                       "model_key": model_key, "api_model": api_model, "ts": time.time()}
                 if use_cache:
                     cache_write(model_key, payload_id, turn, ph, rec)
                 return rec
-            snippet = r.text[:400].replace("\n", " ")
+            snippet = r.text[:300].replace("\n", " ")
             if r.status_code in (429, 500, 502, 503, 504, 529):
                 last_err = f"http_{r.status_code}: {snippet}"
-                time.sleep(min(2 ** attempt * 2 + random.random(), 20))
+                time.sleep(backoffs[min(attempt, len(backoffs) - 1)] + random.random())
                 continue
             return {"text": "", "error": f"http_{r.status_code}: {snippet}", "cached": False, "finish": None}
-        except Exception as e:  # transport
+        except Exception as e:
             last_err = f"{type(e).__name__}: {e}"
-            time.sleep(min(2 ** attempt * 2 + random.random(), 20))
+            time.sleep(backoffs[min(attempt, len(backoffs) - 1)] + random.random())
     return {"text": "", "error": last_err or "unknown", "cached": False, "finish": None}
