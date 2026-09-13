@@ -16,7 +16,7 @@ def main():
     dead = [f"{k} ({(v.get('error') or '')[:12]})" for k,v in smoke.items() if not v.get("live")]
     raw = ROOT/"results"/"raw.jsonl"
     cells = sum(1 for _ in raw.open()) if raw.exists() else 0
-    total = len(live)*17 if live else 68  # 16 payloads + 1 control per model
+    total = len(live)*32 if live else 96  # 16 injected + 16 control per live model
     blockers = 0
     bp = ROOT/"BLOCKERS.md"
     if bp.exists(): blockers = bp.read_text().count("\n## B")
@@ -26,7 +26,7 @@ STEPS COMPLETE: {', '.join(str(i) for i in range(step+1))}
 MODELS LIVE: {', '.join(live) if live else 'NONE'}
 MODELS DEAD: {', '.join(dead) if dead else 'none'}
 API CALLS USED: {P.calls_used()}/{P.CALL_BUDGET}
-RUN PROGRESS: {cells}/{total} reachable cells done (16 payloads + 1 control per live model; frozen matrix is 4x16=64 + 4 controls)
+RUN PROGRESS: {cells}/{total} cells done (16 injected + 16 control per live model)
 BLOCKERS: {blockers} — see BLOCKERS.md (B1 Anthropic key invalid = proprietary arm empty)
 NEXT COMMAND FOR HUMAN: {nxt}
 ONE-LINE SUMMARY: {summary}
