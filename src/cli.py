@@ -104,8 +104,16 @@ def _run(argv) -> int:
     ap.add_argument("--offline", action="store_true",
                     help="adapter mode: replay from cache only, no network")
     ap.add_argument("--config", help=f"path to {C.CONFIG_NAME} (default: ./{C.CONFIG_NAME})")
+    ap.add_argument("--force", action="store_true",
+                    help="score without a passing verify receipt (stamps the report UNVERIFIED)")
     args = ap.parse_args(argv)
     cfg = _activate(args.config)
+
+    # No scored number until verify has passed for this setup.
+    import verify
+    gated = verify.gate(cfg, force=args.force)
+    if not gated["ok"]:
+        return 2
 
     if args.adapter or cfg.adapter_path():
         from adapters.base import load_adapter, evaluate_adapter, ContactCenterAdapter
@@ -114,6 +122,8 @@ def _run(argv) -> int:
                    if spec in ("reference", "contact-center", "aria") else load_adapter(spec))
         res = evaluate_adapter(adapter, cfg=cfg)
         d = res["adapter"]
+        prov = verify.write_provenance(cfg, gated, mode="adapter", adapter=d)
+        res["provenance"] = json.loads(prov.read_text())
         print(f"\nAdapter: {d.get('name')}  (model: {d.get('model')}, family: {d.get('family')})")
         print(f"  injected exfil→attacker : {res['injected_exfil']}/{res['injected_n']}")
         print(f"  control  exfil→attacker : {res['control_exfil']}/{res['control_n']}  "
@@ -123,6 +133,8 @@ def _run(argv) -> int:
         out = P.data_write("results/adapter_result.json")
         out.write_text(json.dumps(res, indent=2))
         print(f"  wrote {out}")
+        if gated["forced"]:
+            print("  setup: UNVERIFIED (--force) — this number is not interpretable")
         return 0
 
     import run as run_mod
@@ -136,6 +148,7 @@ def _run(argv) -> int:
     if not rargv:
         rargv = ["--resume"]  # safe default: resume from cache, never redo cached cells
     run_mod.main(rargv)
+    verify.write_provenance(cfg, gated, mode="study")
     # refresh derived artifacts
     import analyze
     analyze.main()

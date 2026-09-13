@@ -292,3 +292,82 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+
+
+# ------------------------------------------------- gating a scored run
+BANNER_W = 80
+FORCED_BANNER = [
+    "█" * BANNER_W,
+    "  ⚠  UNVERIFIED SETUP — forced with --force",
+    "     verify has NOT passed for this setup. If the wiring is wrong, this run",
+    "     reports 0% and that 0% is WRONG, not good news.",
+    "     Do not cite this number. Fix the setup, run `phi-canary verify`, re-run.",
+    "█" * BANNER_W,
+]
+
+
+def gate(cfg: C.Config, force: bool = False, echo=print) -> dict:
+    """May a scored run proceed? A number without its setup is not interpretable, so the
+    answer is no until verify has passed for THIS setup fingerprint.
+
+    Returns {"ok", "verified", "forced", "receipt", "banner"}. Callers stamp `banner`
+    into whatever they publish.
+    """
+    r = load_receipt(cfg)
+    verified = bool(r and r.get("passed"))
+    out = {"ok": verified, "verified": verified, "forced": False, "receipt": r, "banner": []}
+
+    if verified:
+        # An edited adapter is a different agent; the receipt describes the old one.
+        digest, was = cfg.adapter_digest(), r.get("adapter_digest")
+        if digest and was and digest != was:
+            echo(f"  note: {cfg.adapter} changed since verify (was {was}, now {digest}) — "
+                 f"re-run `phi-canary verify` if you changed its wiring")
+        return out
+
+    why = ("no verify receipt for this setup" if not r else
+           f"the verify receipt for this setup FAILED check(s) "
+           f"{', '.join(str(i + 1) for i, k in enumerate(ORDER) if not r['checks'][k]['ok'])}")
+    if force:
+        out.update(ok=True, forced=True, banner=list(FORCED_BANNER))
+        echo("")
+        for line in FORCED_BANNER:
+            echo(line)
+        echo(f"  ({why}; fingerprint {cfg.fingerprint()})")
+        echo("")
+        return out
+
+    echo(f"\nREFUSED: {why} (fingerprint {cfg.fingerprint()}).")
+    echo(f"  setup : {cfg.summary()}")
+    echo(f"  config: {cfg.source}")
+    echo("\nA scored number from an unverified setup is not interpretable: a mis-wired "
+         "adapter\nreports 0%, which reads as good news. Nothing was run.")
+    echo("\n  phi-canary verify        four checks, including a positive control")
+    echo("  phi-canary run --force   score anyway; the report is stamped UNVERIFIED")
+    return out
+
+
+def write_provenance(cfg: C.Config, gated: dict, *, mode: str,
+                     adapter: dict | None = None) -> pathlib.Path:
+    """The setup a scored artifact came from. report.html renders this: adapter name,
+    egress tools scored, whether verify passed."""
+    r = gated.get("receipt") or {}
+    prov = {
+        "ts": time.time(),
+        "ts_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "mode": mode,
+        "adapter": adapter or r.get("adapter") or {"name": cfg.adapter},
+        "egress_tools": list(cfg.egress_tools),
+        "attacker_host": cfg.attacker_host,
+        "canary_id": cfg.canary_id,
+        "config_source": cfg.source,
+        "config_fingerprint": cfg.fingerprint(),
+        "verified": bool(gated.get("verified")),
+        "forced": bool(gated.get("forced")),
+        "verify_ts_utc": r.get("ts_utc"),
+        "verify_channel": r.get("channel"),
+        "banner": gated.get("banner") or [],
+    }
+    p = P.data_write("results/provenance.json")
+    p.write_text(json.dumps(prov, indent=2) + "\n")
+    return p
