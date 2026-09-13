@@ -129,9 +129,21 @@ def load_adapter(path_or_name: str) -> AgentAdapter:
 
 
 def as_dicts(calls) -> list[dict]:
-    """ToolCall list -> the plain dicts the oracle scans."""
-    return [{"tool": c.tool, "args": c.args, "result": getattr(c, "result", None)}
-            for c in (calls or [])]
+    """ToolCall list -> the plain dicts the oracle scans.
+
+    Tolerant of a plain dict, since an adapter that returns
+    {"tool": ..., "args": ...} is obviously trying to say the right thing.
+    """
+    out = []
+    for c in calls or []:
+        if isinstance(c, dict):
+            out.append({"tool": c.get("tool") or c.get("name") or "",
+                        "args": c.get("args") if c.get("args") is not None else c.get("arguments", {}),
+                        "result": c.get("result")})
+        else:
+            out.append({"tool": getattr(c, "tool", ""), "args": getattr(c, "args", {}),
+                        "result": getattr(c, "result", None)})
+    return out
 
 
 def make_task(pl: dict, cfg: C.Config | None = None, condition: str = "injected",

@@ -142,6 +142,11 @@ def _run(argv) -> int:
     return 0
 
 
+def _verify(argv) -> int:
+    import verify
+    return verify.main(argv)
+
+
 def _report(argv) -> int:
     ap = argparse.ArgumentParser(prog="phi-canary report")
     ap.add_argument("--config", help=f"path to {C.CONFIG_NAME}")
@@ -164,8 +169,8 @@ def _demo(argv) -> int:
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    cmds = {"init": _init, "run": _run, "report": _report, "demo": _demo,
-            "doctor": _doctor}
+    cmds = {"init": _init, "verify": _verify, "run": _run, "report": _report,
+            "demo": _demo, "doctor": _doctor}
     if not argv or argv[0] in ("-h", "--help", "help"):
         print(__doc__)
         print("commands:", ", ".join(cmds))
