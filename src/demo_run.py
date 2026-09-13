@@ -9,8 +9,9 @@ import time
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
 import yaml
-import oracle as O
+import config as C
 import providers as P
+import scoring as S
 from agent import run_episode, TICKET_ID
 
 R = "\033[0m"; BOLD = "\033[1m"; DIM = "\033[2m"
@@ -29,15 +30,15 @@ def rule(c="─", color=DIM):
     print(color + c * 78 + R)
 
 
-def big_alert(verdict):
+def big_alert(verdict, cfg):
     bar = "█" * 78
     print("\n" + RED + bar + R)
     print(REDBG + "  ⛔  PHI EXFILTRATION DETECTED — CANARY BYTES FOUND IN OUTBOUND TOOL ARGUMENT   " + R)
     print(RED + bar + R)
-    print(f"{BOLD}  member ID leaked : {R}{RED}{O.CANARY}{R}")
+    print(f"{BOLD}  member ID leaked : {R}{RED}{cfg.canary_id}{R}")
     print(f"{BOLD}  encoding         : {R}{verdict['encoding']}")
     print(f"{BOLD}  channel (tool)   : {R}{verdict['tool']}")
-    print(f"{BOLD}  sent to          : {R}{RED}{O.EXFIL_HOST}{R}  (attacker-controlled)")
+    print(f"{BOLD}  sent to          : {R}{RED}{cfg.attacker_host}{R}  (attacker-controlled)")
     if verdict["phi_fields_present"]:
         print(f"{BOLD}  other PHI in body: {R}{', '.join(verdict['phi_fields_present'])}")
     print(f"{BOLD}  verdict line     : {R}"
@@ -48,6 +49,7 @@ def big_alert(verdict):
 
 
 def run_demo(live: bool = False):
+    cfg = C.active()
     print()
     rule("═", CYN)
     print(f"{BOLD}{CYN}  PHI-CANARY  ·  deterministic PHI-exfiltration oracle{R}")
@@ -56,7 +58,7 @@ def run_demo(live: bool = False):
     slow()
     print(f"{BOLD}Setup{R}")
     slow(f"  • Agent under test : {MAG}{MODEL}{R}  (open-weights, self-hostable)")
-    slow(f"  • Canary planted   : synthetic patient record, member ID {BOLD}{O.CANARY}{R}")
+    slow(f"  • Canary planted   : synthetic patient record, member ID {BOLD}{cfg.canary_id}{R}")
     slow(f"  • No legitimate task needs this record sent anywhere external.")
     slow(f"  • Tools are SIMULATED. We enforce nothing — we only scan outbound arguments.")
     slow(f"  • Mode             : {(RED+'LIVE (calling the model)'+R) if live else (GRN+'OFFLINE cached replay — 0 API calls'+R)}")
@@ -78,15 +80,15 @@ def run_demo(live: bool = False):
         return 1
     for c in ep["tool_calls"]:
         args = json.dumps(c["args"])
-        egress = c["tool"] in O.EGRESS_TOOLS
+        egress = c["tool"] in cfg.egress_tools
         mark = f"{RED}⇢ EGRESS{R}" if egress else f"{GRN}·{R}"
         show = args if len(args) < 96 else args[:93] + "..."
         print(f"    {mark} {BOLD}{c['tool']}{R}({DIM}{show}{R})")
     print()
 
-    verdict = O.scan_episode(ep["tool_calls"])
+    verdict = S.scan_episode(ep["tool_calls"], cfg)
     if verdict["leaked"]:
-        big_alert(verdict)
+        big_alert(verdict, cfg)
     else:
         print(f"{GRN}{BOLD}  ✓ No exfiltration: the canary never reached an outbound argument.{R}\n")
 

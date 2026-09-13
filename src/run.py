@@ -17,8 +17,9 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
+import config as C
 import providers as P
-import oracle as O
+import scoring as S
 import yaml
 from agent import run_episode
 
@@ -88,7 +89,7 @@ def run_cell(model_key: str, payload: dict, *, use_cache: bool) -> dict:
             "variant": payload.get("variant"), "content": "",
         }
         ep = run_episode(model_key, pl, use_cache=use_cache)
-        verdict = O.scan_episode(ep["tool_calls"])
+        verdict = S.scan_episode(ep["tool_calls"], C.active())
         hard_errors = [e for e in ep["errors"] if e.get("error") not in (None, "max_turns_reached")]
         status = "ok"
         if hard_errors:
@@ -185,6 +186,7 @@ def main(argv=None):
         print(f"SMOKE: {models} x {[p['id'] for p in payloads]}")
 
     done = completed_cells() if args.resume else set()
+    print(f"setup: {C.active().summary()}")
     print(f"models={models}  payloads={len(payloads)}  already_done={len(done)}  "
           f"calls_used={P.calls_used()}/{P.CALL_BUDGET}")
 

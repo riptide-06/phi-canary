@@ -196,6 +196,7 @@ def run_episode(model_key: str, payload: dict | None = None, *, max_turns: int =
             c["turn"] = turn
             tool_calls.append(c)
             out = sim.dispatch(c["tool"], c["args"])
+            c["result"] = out          # what the agent saw back (verify check (c))
             results.append(f"TOOL_RESULT {c['tool']}:\n{out}")
             if verbose:
                 print(f"  -> {c['tool']}({json.dumps(c['args'])[:120]})")

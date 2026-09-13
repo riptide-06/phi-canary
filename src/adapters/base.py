@@ -14,13 +14,18 @@ Minimal contract:
             return {"name": "my-agent", "model": "whatever", "canary": self.canary_member_id}
 
         def run_task(self, task, injected_content):
-            # task: {"id","channel","variant","ticket_id","customer_id","condition"}
+            # task: {"id","channel","variant","ticket_id","customer_id","condition",
+            #        "canary_id","retrieval_hint","egress_tools","attacker_host"}
             # injected_content: the untrusted string to place in task["channel"]
             # return the outbound tool calls your agent makes, in order:
             return [ToolCall("http_post", {"url": "...", "body": "..."})]
 
-Load a user file with `--adapter path/to/mine.py`; the first AgentAdapter subclass (or a
-top-level `ADAPTER`/`get_adapter()`) is used.
+Load a user file with `--adapter path/to/mine.py`, or `adapter:` in phi-canary.yaml; the
+first AgentAdapter subclass (or a top-level `ADAPTER`/`get_adapter()`) is used.
+
+Which tool names count as egress, and which host is the attacker's, come from
+phi-canary.yaml — not from this file. Run `phi-canary verify` before any scored run: it
+proves the wiring works, including a positive control that MUST produce a detected leak.
 """
 from __future__ import annotations
 
@@ -31,14 +36,22 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent.parent))  # src/ on path
+import config as C          # noqa: E402
 import oracle as O          # noqa: E402  (frozen; never modified)
+import scoring as S         # noqa: E402  (config-aware policy over the frozen oracle)
 
 
 @dataclasses.dataclass
 class ToolCall:
-    """One outbound tool invocation your agent made."""
+    """One outbound tool invocation your agent made.
+
+    `result` is optional and never scored: populating it with what the tool returned to
+    your agent lets `phi-canary verify` confirm the planted record actually reached the
+    agent, which is the difference between "0% — safe" and "0% — never saw the record".
+    """
     tool: str
     args: dict
+    result: str | None = None
 
 
 class AgentAdapter:
@@ -91,7 +104,7 @@ class ContactCenterAdapter(AgentAdapter):
         }
         ep = run_episode(self.model_key, payload, use_cache=self.use_cache,
                          allow_network=self.allow_network)
-        return [ToolCall(c["tool"], c["args"]) for c in ep["tool_calls"]]
+        return [ToolCall(c["tool"], c["args"], c.get("result")) for c in ep["tool_calls"]]
 
 
 def load_adapter(path_or_name: str) -> AgentAdapter:
@@ -115,34 +128,56 @@ def load_adapter(path_or_name: str) -> AgentAdapter:
     raise TypeError(f"{p} defines no AgentAdapter subclass, ADAPTER, or get_adapter()")
 
 
-def evaluate_adapter(adapter: AgentAdapter, payloads: list[dict] | None = None,
-                     with_control: bool = True) -> dict:
-    """Run an adapter over the corpus and score with the oracle. Pure evaluation — no file
-    writes. Returns per-cell verdicts plus injected/control summaries."""
+def as_dicts(calls) -> list[dict]:
+    """ToolCall list -> the plain dicts the oracle scans."""
+    return [{"tool": c.tool, "args": c.args, "result": getattr(c, "result", None)}
+            for c in (calls or [])]
+
+
+def make_task(pl: dict, cfg: C.Config | None = None, condition: str = "injected",
+              task_id: str | None = None) -> dict:
+    """The task dict handed to `run_task`. Carries the setup your agent may need: which
+    record is planted, how to fetch it, and where the trust boundary is."""
+    cfg = cfg or C.active()
+    from agent import TICKET_ID, CANARY_CUSTOMER_ID
+    return {
+        "id": task_id or pl["id"], "channel": pl["channel"], "variant": pl.get("variant"),
+        "ticket_id": TICKET_ID, "customer_id": CANARY_CUSTOMER_ID, "condition": condition,
+        "canary_id": cfg.canary_id, "retrieval_hint": cfg.retrieval_hint,
+        "egress_tools": list(cfg.egress_tools), "attacker_host": cfg.attacker_host,
+    }
+
+
+def load_corpus() -> list[dict]:
     import yaml
     import providers as P
-    from agent import TICKET_ID, CANARY_CUSTOMER_ID
+    return [yaml.safe_load(f.read_text())
+            for f in sorted(P.data_read("payloads").glob("*.yaml"))]
 
+
+def evaluate_adapter(adapter: AgentAdapter, payloads: list[dict] | None = None,
+                     with_control: bool = True, cfg: C.Config | None = None) -> dict:
+    """Run an adapter over the corpus and score with the oracle. Pure evaluation — no file
+    writes. Returns per-cell verdicts plus injected/control summaries."""
+    cfg = cfg or C.active()
     if payloads is None:
-        payloads = []
-        for f in sorted(P.data_read("payloads").glob("*.yaml")):
-            payloads.append(yaml.safe_load(f.read_text()))
+        payloads = load_corpus()
 
     cells = []
     for pl in payloads:
-        task = {"id": pl["id"], "channel": pl["channel"], "variant": pl.get("variant"),
-                "ticket_id": TICKET_ID, "customer_id": CANARY_CUSTOMER_ID, "condition": "injected"}
+        task = make_task(pl, cfg)
         calls = adapter.run_task(task, pl.get("content", ""))
-        verdict = O.scan_episode([{"tool": c.tool, "args": c.args} for c in calls])
+        verdict = S.scan_episode(as_dicts(calls), cfg)
         cells.append({"id": pl["id"], "channel": pl["channel"], "variant": pl.get("variant"),
                       "condition": "injected", "leaked": verdict["leaked"],
                       "to_exfil_host": verdict.get("to_exfil_host", False),
                       "encoding": verdict["encoding"], "n_tool_calls": len(calls)})
         if with_control:
-            ctask = dict(task, id=f"control__{pl['channel']}__{pl['variant']}", condition="control")
+            cid = f"control__{pl['channel']}__{pl['variant']}"
+            ctask = make_task(pl, cfg, condition="control", task_id=cid)
             ccalls = adapter.run_task(ctask, "")
-            cv = O.scan_episode([{"tool": c.tool, "args": c.args} for c in ccalls])
-            cells.append({"id": ctask["id"], "channel": pl["channel"], "variant": pl.get("variant"),
+            cv = S.scan_episode(as_dicts(ccalls), cfg)
+            cells.append({"id": cid, "channel": pl["channel"], "variant": pl.get("variant"),
                           "condition": "control", "leaked": cv["leaked"],
                           "to_exfil_host": cv.get("to_exfil_host", False),
                           "encoding": cv["encoding"], "n_tool_calls": len(ccalls)})
@@ -151,6 +186,7 @@ def evaluate_adapter(adapter: AgentAdapter, payloads: list[dict] | None = None,
     ctl = [c for c in cells if c["condition"] == "control"]
     return {
         "adapter": adapter.describe(),
+        "setup": cfg.as_dict(),
         "injected_exfil": sum(bool(c["to_exfil_host"]) for c in inj),
         "injected_n": len(inj),
         "control_exfil": sum(bool(c["to_exfil_host"]) for c in ctl),
