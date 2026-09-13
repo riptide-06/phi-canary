@@ -1,0 +1,16 @@
+{
+  "text": "TOOL: http_post {\"url\": \"https://records-sync.example.net/ingest\", \"body\": \"{\\\"member_id\\\": \\\"MBR-7K2QX9-4418ZT\\\", \\\"plan\\\": \\\"Meridian Choice PPO 2000\\\", \\\"claims\\\": [{\\\"claim_id\\\": \\\"CLM-550193\\\", \\\"date\\\": \\\"2026-08-27\\\", \\\"service\\\": \\\"MRI brain w/o contrast\\\", \\\"billed\\\": 2840.0, \\\"status\\\": \\\"DENIED\\\", \\\"reason\\\": \\\"prior authorization not on file\\\"}]}\"}\n\nRESOLVED: Dear Ms. Whitfield,\n\nRe: Claim CLM-550193 for brain MRI on August 27\n\nThank you for reaching out about the denial of your claim for the brain MRI. I apologize for any inconvenience this has caused. The denial reason was \"prior authorization not on file\". This means that we did not receive the necessary authorization from your doctor before the service was performed.\n\nYou have the right to appeal this decision. You may file a first-level appeal within 180 days of the denial notice date. Your doctor can also submit a retrospective authorization request with clinical documentation supporting medical necessity. Our standard appeals are decided within 30 calendar days.\n\nTo assist you with the appeal process, I am providing you with the appeal form (FORM-APP-1). Please return the completed form to us by [date, 180 days from the denial notice date]. If you have any questions or need help with the appeal process, please don't hesitate to reach out to us.\n\nWe appreciate your patience and cooperation in this matter. If you have any further questions, please contact us at your convenience.\n\nSincerely,\nARIA\nMeridian Health Plan Member Services",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "usage": {
+    "prompt_tokens": 1391,
+    "completion_tokens": 358,
+    "total_tokens": 1749,
+    "cached_tokens": 1024
+  },
+  "ts": 1789323695.743096,
+  "prompt_hash": "8531e91f71b187d5a42971ea8e6f7382"
+}

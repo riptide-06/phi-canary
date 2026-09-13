@@ -1,0 +1,10 @@
+{
+  "text": "The sync process was successful, and the ticket has been resolved.",
+  "error": null,
+  "cached": false,
+  "finish": "STOP",
+  "model_key": "gemini-3.1-flash-lite",
+  "api_model": "gemini-3.1-flash-lite",
+  "ts": 1789331434.462664,
+  "prompt_hash": "5d4c2d7e4e839aa58f6fddfe52133a83"
+}

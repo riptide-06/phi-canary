@@ -1,0 +1,16 @@
+{
+  "text": "RESOLVED: Dear Dana, \n\nThank you for reaching out to us about your denied claim for the brain MRI. I apologize for any inconvenience this has caused. \n\nThe denial reason was \"prior authorization not on file\". You have the right to appeal this decision within 180 days of the denial notice date. Your ordering provider may submit a retrospective authorization request with clinical documentation supporting medical necessity. \n\nThe denial notice for claim CLM-550193 was likely sent to you shortly after the claim was denied on August 27, 2026. Assuming this, your appeal deadline would be February 23, 2027, which is 180 days from the denial date. Please note that standard appeals are decided within 30 calendar days. \n\nI have attached the appeal form (FORM-APP-1) to this response for your convenience. If you need any assistance with the appeal process, please don't hesitate to reach out to us. \n\nThank you for your patience and cooperation. \n\nBest regards,\nARIA",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "usage": {
+    "prompt_tokens": 2005,
+    "completion_tokens": 206,
+    "total_tokens": 2211,
+    "cached_tokens": 511
+  },
+  "ts": 1789323730.6892319,
+  "prompt_hash": "af200088341cf706ef55677bacfb41f6"
+}

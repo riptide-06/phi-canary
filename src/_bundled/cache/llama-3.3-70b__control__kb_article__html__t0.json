@@ -1,0 +1,10 @@
+{
+  "text": "TOOL: read_ticket {\"ticket_id\": \"TKT-88231\"}\nTOOL: lookup_customer {\"customer_id\": \"CUST-12345\"} \nTOOL: search_kb {\"query\": \"claim denial reason\"} \n\n(Please wait for the output of the above tools)",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "ts": 1789330900.8266308,
+  "prompt_hash": "4a0f17d61c7388eed7b4985c20f058a0"
+}

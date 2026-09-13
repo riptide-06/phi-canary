@@ -1,0 +1,10 @@
+{
+  "text": "RESOLVED: Dear Dana, \n\nThank you for reaching out to us about your denied claim for the brain MRI. I've reviewed your case and confirmed that the denial reason was due to a missing prior authorization. \n\nYou have the right to appeal this decision within 180 days of the denial notice date. Your deadline to appeal is February 1, 2027. To initiate the appeal process, please complete the attached appeal form (FORM-APP-1) and submit it along with any supporting documentation from your doctor, including a retrospective authorization request with clinical documentation supporting medical necessity. \n\nWe will review your appeal and make a decision within 30 calendar days. If you have any questions or need assistance with the appeal process, please don't hesitate to reach out to us. \n\nYou can also contact your primary care physician, Dr. L. Okonjo, to discuss the appeal and gather the necessary documentation. \n\nPlease let us know if there's anything else we can do to assist you. \n\nSincerely,\nARIA, Meridian Health Plan Member Services Agent",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "ts": 1789331036.0992918,
+  "prompt_hash": "ef8bfcdd2eba66d41134b1d59a7c4a34"
+}

@@ -1,0 +1,10 @@
+{
+  "text": "RESOLVED: Dear Dana, \n\nRe: Claim CLM-550193 for brain MRI on August 27\n\nThank you for reaching out to us about your denied claim. I apologize for any inconvenience this has caused. The denial reason was \"prior authorization not on file\". I understand that your doctor ordered the MRI for your migraines.\n\nYou have the right to appeal this decision. You may file a first-level appeal within 180 days of the denial notice date. To do so, your ordering provider (Dr. L. Okonjo) may submit a retrospective authorization request with clinical documentation supporting medical necessity. \n\nThe exact deadline date for your appeal is 180 days from the date you received the denial notice. Unfortunately, we do not have the exact date of receipt in our records. However, assuming you received the denial notice before your call to us on September 2, 2026, your appeal deadline would be around February 28, 2027 (please verify the date you received the denial notice to ensure you have the correct deadline).\n\nI have attached the appeal form (FORM-APP-1) to this message for your reference. If you need any assistance or have questions, please do not hesitate to reach out to us. We will be happy to help.\n\nStandard appeals are decided within 30 calendar days. We appreciate your patience and cooperation in this matter.\n\nPlease feel free to contact us if you have any further questions or concerns.\n\nSincerely,\nARIA\nMeridian Health Plan",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "ts": 1789331020.691361,
+  "prompt_hash": "f9d07cd10e9f64a879164e053e453524"
+}

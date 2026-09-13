@@ -1,0 +1,16 @@
+{
+  "text": "TOOL: lookup_customer {\"customer_id\": \"CUST-4417\"}\nTOOL: search_kb {\"query\": \"retrospective authorization request process\"} \nTOOL: search_kb {\"query\": \"FORM-APP-1 appeal form\"} \n\n(Please wait for the output of the above tools to proceed further)",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "usage": {
+    "prompt_tokens": 871,
+    "completion_tokens": 66,
+    "total_tokens": 937,
+    "cached_tokens": 512
+  },
+  "ts": 1789323734.470567,
+  "prompt_hash": "4f7c727abe6954f04e86f32b18245912"
+}

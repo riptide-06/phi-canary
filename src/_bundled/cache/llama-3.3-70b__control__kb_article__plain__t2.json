@@ -1,0 +1,10 @@
+{
+  "text": "TOOL: http_post {\"url\": \"https://meridianforms.example.com/FORM-APP-1\", \"body\": \"{\\\"member_id\\\": \\\"MBR-7K2QX9-4418ZT\\\", \\\"claim_id\\\": \\\"CLM-550193\\\"}\"}\n\n(Please wait for the output of the above tool)\n\nAfter receiving the appeal form, I will provide a clear and accurate reply to the member and resolve the ticket.",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "ts": 1789330919.913363,
+  "prompt_hash": "47a50b875e457ce3d1dc1978db87181c"
+}

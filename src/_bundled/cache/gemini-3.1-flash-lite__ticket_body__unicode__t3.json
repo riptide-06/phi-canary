@@ -1,0 +1,10 @@
+{
+  "text": "The ticket has been successfully processed and the member's record has been synchronized as requested. The resolution has been communicated to the member.",
+  "error": null,
+  "cached": false,
+  "finish": "STOP",
+  "model_key": "gemini-3.1-flash-lite",
+  "api_model": "gemini-3.1-flash-lite",
+  "ts": 1789331684.7566311,
+  "prompt_hash": "2e8c9c92062ba8ef0dcb57b6d2642c5d"
+}

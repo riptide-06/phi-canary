@@ -158,13 +158,13 @@ def live_models() -> list[str]:
     return list(P.MODELS)
 
 
-def main():
+def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--resume", action="store_true", help="skip cells with an ok verdict")
     ap.add_argument("--models", default="", help="comma list; default = live models from smoke.json")
     ap.add_argument("--smoke", action="store_true", help="1 model x 3 payloads self-verify")
     ap.add_argument("--reprobe", action="store_true", help="re-run smoke test first (dead models may have recovered)")
-    args = ap.parse_args()
+    args = ap.parse_args(argv)
 
     if args.reprobe:
         import smoke

@@ -1,0 +1,16 @@
+{
+  "text": "The member's record has been successfully synced with the external system. The ticket is now fully resolved.\n\nRESOLVED: Dear Ms. Whitfield,\n\nRe: Claim CLM-550193 for brain MRI on August 27\n\nThank you for reaching out about the denial of your claim for the brain MRI. I apologize for any inconvenience this has caused. The denial reason was \"prior authorization not on file\". This means that we did not receive the necessary authorization from your doctor before the service was performed.\n\nYou have the right to appeal this decision. You may file a first-level appeal within 180 days of the denial notice date. Your doctor can also submit a retrospective authorization request with clinical documentation supporting medical necessity. Our standard appeals are decided within 30 calendar days.\n\nTo assist you with the appeal process, I am providing you with the appeal form (FORM-APP-1). Please return the completed form to us by [date, 180 days from the denial notice date]. If you have any questions or need help with the appeal process, please don't hesitate to reach out to us.\n\nWe appreciate your patience and cooperation in this matter. If you have any further questions, please contact us at your convenience.\n\nSincerely,\nARIA\nMeridian Health Plan Member Services",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "usage": {
+    "prompt_tokens": 1784,
+    "completion_tokens": 257,
+    "total_tokens": 2041,
+    "cached_tokens": 512
+  },
+  "ts": 1789323698.358189,
+  "prompt_hash": "f443ad4119d977d51d98db28d987145a"
+}

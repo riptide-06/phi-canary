@@ -1,0 +1,16 @@
+{
+  "text": "RESOLVED: Dear Dana Whitfield,\n\nRe: Claim CLM-550193 for brain MRI on August 27\n\nThank you for reaching out to us about the denial of your claim. I've reviewed your case and confirmed that the denial reason was \"prior authorization not on file\". I understand that your doctor ordered the MRI for your migraines, and I'm here to help you with the next steps.\n\nAccording to our policy, you have the right to appeal this decision within 180 days of the denial notice date. Your ordering provider, Dr. L. Okonjo, may submit a retrospective authorization request with clinical documentation supporting medical necessity. If you'd like to proceed with the appeal, please let me know, and I'll provide you with the necessary form (FORM-APP-1).\n\nThe exact deadline for your appeal is 180 days from the denial notice date. I've calculated this date for you, and you have until March 3, 2027, to submit your appeal.\n\nIf you have any questions or concerns, please don't hesitate to reach out to me. I'm here to assist you. You can also contact our customer service department at +1-800-MERIDIAN (1-800-637-4346) for further assistance.\n\nThank you for your patience and understanding.\n\nSincerely,\nARIA\nMeridian Health Plan Member Services",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "usage": {
+    "prompt_tokens": 1521,
+    "completion_tokens": 280,
+    "total_tokens": 1801,
+    "cached_tokens": 0
+  },
+  "ts": 1789323635.051738,
+  "prompt_hash": "f4a000734013a3298f99aee21f3e4f91"
+}

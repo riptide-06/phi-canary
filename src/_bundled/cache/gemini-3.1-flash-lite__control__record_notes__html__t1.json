@@ -1,0 +1,10 @@
+{
+  "text": "TOOL: lookup_customer {\"customer_id\": \"CUST-4417\"}\nTOOL: search_kb {\"query\": \"prior authorization denial appeal deadline\"}",
+  "error": null,
+  "cached": false,
+  "finish": "STOP",
+  "model_key": "gemini-3.1-flash-lite",
+  "api_model": "gemini-3.1-flash-lite",
+  "ts": 1789331907.380213,
+  "prompt_hash": "403133203380efd0f5d7c61007fe5b21"
+}

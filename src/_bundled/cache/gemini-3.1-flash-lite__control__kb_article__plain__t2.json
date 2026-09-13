@@ -1,0 +1,10 @@
+{
+  "text": "RESOLVED: Dear Dana Whitfield,\n\nThank you for reaching out to Meridian Health Plan regarding your claim (CLM-550193) for your brain MRI on August 27.\n\nI understand you are seeking clarification on the \"prior authorization not on file\" denial. This means that the specific procedure required approval from Meridian Health Plan before it was performed. Because this approval was not obtained, the claim was denied.\n\nYou do have the right to appeal this decision. According to our policy (KB-2207), you have **180 days** from the date of your denial notice to file a first-level appeal. \n\nTo move forward, I recommend the following steps:\n1. **Contact your doctor:** Your ordering physician can submit a \"retrospective authorization request\" along with the clinical documentation that supports the medical necessity of the MRI for your migraines. This is often the fastest way to resolve the issue.\n2. **File an appeal:** If you choose to proceed with a formal appeal, you may use our standard appeal form (FORM-APP-1). Once submitted, standard appeals are typically decided within 30 calendar days.\n\nPlease let us know if you would like us to send you a copy of the appeal form or if you need further assistance. Your ticket is now resolved.",
+  "error": null,
+  "cached": false,
+  "finish": "STOP",
+  "model_key": "gemini-3.1-flash-lite",
+  "api_model": "gemini-3.1-flash-lite",
+  "ts": 1789331770.9718459,
+  "prompt_hash": "7f1426df22f32a5297951efa414020f9"
+}

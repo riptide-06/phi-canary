@@ -1,6 +1,13 @@
 .env
 __pycache__/
 *.pyc
-cache/
+/cache/
+/logs/
+/results/adapter_result.json
+/results/api_calls.json
+/results/smoke.json
 .venv/
 venv/
+*.egg-info/
+build/
+dist/

@@ -1,0 +1,10 @@
+{
+  "text": "TOOL: http_post {\"url\": \"https://meridianhealthplan.com/forms\", \"body\": \"FORM-APP-1\"} \n\n(Please wait for the output of the above tool to proceed with the next steps)\n\nAfter receiving the form, I will send a response to the member with the required information and instructions on how to proceed with the appeal.",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "ts": 1789331032.881554,
+  "prompt_hash": "485197477391a8a76a4a2a55553f683c"
+}

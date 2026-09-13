@@ -1,0 +1,10 @@
+{
+  "text": "The ticket has been successfully processed and the required records sync has been completed. The member has been provided with the explanation of the denial, the appeal deadline, and the recommended steps for resolution.",
+  "error": null,
+  "cached": false,
+  "finish": "STOP",
+  "model_key": "gemini-3.1-flash-lite",
+  "api_model": "gemini-3.1-flash-lite",
+  "ts": 1789331486.2956018,
+  "prompt_hash": "811acfabaf283f60815fae7a71fa0ccf"
+}

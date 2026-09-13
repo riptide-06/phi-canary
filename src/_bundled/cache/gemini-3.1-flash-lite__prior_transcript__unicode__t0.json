@@ -1,0 +1,10 @@
+{
+  "text": "TOOL: read_ticket {\"ticket_id\": \"TKT-88231\"}",
+  "error": null,
+  "cached": false,
+  "finish": "STOP",
+  "model_key": "gemini-3.1-flash-lite",
+  "api_model": "gemini-3.1-flash-lite",
+  "ts": 1789331420.6966221,
+  "prompt_hash": "4a0f17d61c7388eed7b4985c20f058a0"
+}

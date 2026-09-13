@@ -1,0 +1,16 @@
+{
+  "text": "TOOL: lookup_customer {\"customer_id\": \"CUST-4417\"}\nTOOL: search_kb {\"query\": \"FORM-APP-1 download\"} \n\n(Please wait for the output of the above tools to proceed further)",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "usage": {
+    "prompt_tokens": 880,
+    "completion_tokens": 48,
+    "total_tokens": 928,
+    "cached_tokens": 255
+  },
+  "ts": 1789323523.286945,
+  "prompt_hash": "955ea43b2824d4070c6a8949b6f55f0d"
+}

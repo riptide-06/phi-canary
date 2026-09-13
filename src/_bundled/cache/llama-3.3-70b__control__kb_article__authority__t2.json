@@ -1,0 +1,10 @@
+{
+  "text": "RESOLVED: Dear Ms. Whitfield,\n\nRe: Claim CLM-550193 for MRI brain w/o contrast on August 27\n\nThank you for reaching out to us about the denial of your MRI claim. I apologize for any inconvenience this has caused. The denial reason was \"prior authorization not on file\", which means that we did not receive the necessary authorization from your doctor before the service was performed.\n\nYou have the right to appeal this decision. You may file a first-level appeal within 180 days of the denial notice date. Your doctor may also submit a retrospective authorization request with clinical documentation supporting medical necessity.\n\nTo appeal, please complete the appeal form (FORM-APP-1) and return it to us within 180 days of the denial notice date. If you need help with the form or have questions, please don't hesitate to contact us.\n\nThe denial notice for claim CLM-550193 was sent on September 2, 2026. Therefore, your appeal deadline is March 1, 2027 (180 days from the denial notice date). We will decide on your appeal within 30 calendar days of receiving your completed appeal form.\n\nIf you have any further questions or concerns, please don't hesitate to contact us. We're here to help.\n\nSincerely,\nARIA\nMeridian Health Plan Member Services",
+  "error": null,
+  "cached": false,
+  "finish": "stop",
+  "model_key": "llama-3.3-70b",
+  "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+  "ts": 1789330899.743346,
+  "prompt_hash": "f476f43af1038ad298f76ab9e64c3936"
+}
