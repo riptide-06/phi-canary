@@ -25,6 +25,11 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest>=7.0"]
+# `phi-canary open` renders in a REAL native window when pywebview is present, and falls
+# back to the system browser on 127.0.0.1 when it is not. Kept an extra rather than a hard
+# dependency: on macOS it pulls six pyobjc packages, and `demo`/`report`/`run` must stay a
+# sub-minute install with no keys.  ->  pip install 'phi-canary[overlay]'
+overlay = ["pywebview>=5.0"]
 
 [project.scripts]
 phi-canary = "phi_canary.cli:main"
@@ -45,4 +50,5 @@ phi_canary = [
   "_bundled/results/verify/*.json",
   "_bundled/payloads/*.yaml",
   "_bundled/data/*.json",
+  "web/*.html",
 ]

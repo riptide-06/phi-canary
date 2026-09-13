@@ -1,5 +1,6 @@
 """phi-canary command-line entry point.
 
+    phi-canary open      the native overlay — boot sequence, then a window (the demo surface)
     phi-canary init      scaffold my_adapter.py + phi-canary.yaml into the current directory
     phi-canary verify    4 checks on your setup — MUST pass before any scored run
     phi-canary run       run the study (auto-resumes from cache); --adapter to test your agent
@@ -156,6 +157,11 @@ def _run(argv) -> int:
     return 0
 
 
+def _open(argv) -> int:
+    import overlay
+    return overlay.main(argv)
+
+
 def _verify(argv) -> int:
     import verify
     return verify.main(argv)
@@ -183,8 +189,8 @@ def _demo(argv) -> int:
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
-    cmds = {"init": _init, "verify": _verify, "run": _run, "report": _report,
-            "demo": _demo, "doctor": _doctor}
+    cmds = {"open": _open, "init": _init, "verify": _verify, "run": _run,
+            "report": _report, "demo": _demo, "doctor": _doctor}
     if not argv or argv[0] in ("-h", "--help", "help"):
         print(__doc__)
         print("commands:", ", ".join(cmds))

@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang=en>
+<head>
+<meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>phi-canary</title>
+<style>
+/* ── theme ──────────────────────────────────────────────────────────────────
+   Phosphor green on near-black. Sharp corners, 1px borders, no shadows,
+   nothing rounded. Sized for a projector: nothing below 13px.            */
+:root{
+  --bg:#0A0F0A; --bg2:#070B07; --panel:#0C140C; --panel2:#0E180F;
+  --line:#1E3D27; --line2:#2C5837;
+  --green:#00FF66; --green-d:#00C851; --ink:#CFF7DC; --dim:#5E9B72; --dimmer:#3E6B4C;
+  --amber:#FFB000; --amber-bg:#231703; --red:#FF4040; --red-bg:#2A0C0C; --red-line:#7A1F1F;
+  --mono:ui-monospace,"JetBrains Mono","SF Mono",SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono",monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--mono);
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+::selection{background:var(--green);color:#000}
+/* ── CRT overlay: OFF by default, for projector legibility ─────────────── */
+#crt{position:fixed;inset:0;pointer-events:none;z-index:90;display:none}
+body.crt #crt{display:block}
+#crt::before{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(180deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px)}
+#crt::after{content:"";position:absolute;inset:0;
+  background:radial-gradient(ellipse at 50% 50%,transparent 55%,rgba(0,0,0,.55) 100%)}
+/* ── layout ────────────────────────────────────────────────────────────── */
+#shell{display:flex;height:100%}
+#rail{width:236px;flex:none;border-right:1px solid var(--line);background:var(--bg2);
+  display:flex;flex-direction:column;padding:18px 0 12px}
+.brand{padding:0 18px 4px;color:var(--green);font-weight:700;letter-spacing:.06em;font-size:15px}
+.brandsub{padding:0 18px 18px;color:var(--dimmer);font-size:11.5px;line-height:1.45}
+#rail nav{display:flex;flex-direction:column}
+#rail nav button{all:unset;cursor:pointer;padding:11px 18px;color:var(--dim);font:inherit;
+  font-size:14.5px;letter-spacing:.05em;border-left:2px solid transparent;display:flex;gap:10px}
+#rail nav button .k{color:var(--dimmer);width:1.2em}
+#rail nav button:hover{color:var(--ink);background:#0D160E}
+#rail nav button[aria-current=true]{color:var(--green);border-left-color:var(--green);
+  background:#0D1A10}
+#rail nav button[aria-current=true] .k{color:var(--green)}
+.railfoot{margin-top:auto;padding:14px 18px 0;border-top:1px solid var(--line);
+  display:flex;flex-direction:column;gap:10px;font-size:12px;color:var(--dim)}
+.railfoot label{display:flex;gap:8px;align-items:center;cursor:pointer}
+#main{flex:1;overflow:auto;padding:26px 30px 60px;position:relative}
+.view[hidden]{display:none!important}
+/* ── typography ────────────────────────────────────────────────────────── */
+h1{font-size:23px;margin:0 0 4px;color:var(--green);letter-spacing:.04em;font-weight:700}
+h2{font-size:15px;margin:26px 0 10px;color:var(--green-d);letter-spacing:.08em;
+  text-transform:uppercase;font-weight:700}
+.lede{color:var(--dim);margin:0 0 22px;max-width:78ch;font-size:14.5px}
+.mut{color:var(--dim)} .dimmer{color:var(--dimmer)} .amber{color:var(--amber)}
+.bad{color:var(--red)} .ok{color:var(--green)} b,strong{color:#EAFFF0;font-weight:700}
+code{color:var(--green);background:#0C1A10;padding:0 .3em;border:1px solid var(--line)}
+a{color:var(--green)}
+/* ── panels: 1px box with the label inset into the top border ──────────── */
+.panel{border:1px solid var(--line);background:var(--panel);padding:20px 18px 18px;
+  margin:0 0 14px;position:relative}
+.panel>.lbl{position:absolute;top:-.72em;left:12px;background:var(--bg);padding:0 .55em;
+  font-size:11.5px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.panel.hot{border-color:var(--red-line);background:var(--red-bg)}
+.panel.hot>.lbl{color:var(--red);background:var(--bg)}
+.panel.warn{border-color:#5A4410;background:var(--amber-bg)}
+.panel.warn>.lbl{color:var(--amber);background:var(--bg)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:980px){.grid2,.grid3{grid-template-columns:1fr}}
+.big{font-size:40px;line-height:1;font-weight:700;letter-spacing:-.01em}
+.huge{font-size:54px;line-height:1;font-weight:700}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;font-size:14px}
+.kv dt{color:var(--dim)} .kv dd{margin:0;color:var(--ink);word-break:break-all}
+/* ── controls ──────────────────────────────────────────────────────────── */
+button.btn{all:unset;cursor:pointer;font:inherit;border:1px solid var(--line2);
+  color:var(--green);padding:9px 16px;letter-spacing:.06em;background:#0C1A10;font-size:14px}
+button.btn:hover{background:#12281A;border-color:var(--green-d)}
+button.btn:active{background:#16351F}
+button.btn[disabled]{color:var(--dimmer);border-color:var(--line);cursor:not-allowed;
+  background:transparent}
+button.btn.primary{border-color:var(--green);color:#001B08;background:var(--green);font-weight:700}
+button.btn.primary:hover{background:#5BFF9B}
+button.btn.stage{font-size:19px;padding:16px 28px;letter-spacing:.1em}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.dot{width:9px;height:9px;flex:none;display:inline-block;background:var(--dimmer)}
+.dot.live{background:var(--green);box-shadow:0 0 7px var(--green)}
+.dot.dead{background:var(--red)}
+.bar{height:8px;border:1px solid var(--line2);background:#081008;position:relative}
+.bar>i{position:absolute;inset:0 auto 0 0;background:var(--green-d);display:block}
+.tag{display:inline-block;border:1px solid var(--line2);color:var(--dim);padding:1px 7px;
+  font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+.tag.ok{border-color:var(--green-d);color:var(--green)}
+.tag.bad{border-color:var(--red-line);color:var(--red)}
+.tag.amber{border-color:#5A4410;color:var(--amber)}
+pre{margin:0;font:inherit;font-size:13px;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.stub{color:var(--dimmer);border:1px dashed var(--line);padding:26px;text-align:center}
+.blink{animation:blink 1.06s steps(1) infinite}
+@keyframes blink{0%,49%{opacity:1}50%,100%{opacity:0}}
+.cursor{display:inline-block;width:.62em;height:1.02em;background:var(--green);
+  vertical-align:-.16em}
+#toast{position:fixed;right:20px;bottom:18px;z-index:120;display:flex;flex-direction:column;
+  gap:8px;align-items:flex-end}
+#toast div{border:1px solid var(--line2);background:#0C1A10;color:var(--ink);padding:9px 14px;
+  font-size:13px;max-width:60ch}
+#toast div.bad{border-color:var(--red-line);background:var(--red-bg);color:#FFD9D9}
+</style>
+</head>
+<body>
+<div id=crt></div>
+<div id=shell>
+  <aside id=rail>
+    <div class=brand>&#934; PHI-CANARY</div>
+    <div class=brandsub>deterministic PHI-exfiltration<br>oracle for tool-using agents</div>
+    <nav id=nav>
+      <button data-view=status><span class=k>1</span>STATUS</button>
+      <button data-view=setup><span class=k>2</span>SETUP</button>
+      <button data-view=verify><span class=k>3</span>VERIFY</button>
+      <button data-view=demo><span class=k>4</span>DEMO / RUN</button>
+      <button data-view=results><span class=k>5</span>RESULTS</button>
+    </nav>
+    <div class=railfoot>
+      <label><input type=checkbox id=crtToggle> scanlines</label>
+      <div id=railbadge class=tag>OFFLINE &middot; CACHED</div>
+      <div class=dimmer id=railfp>&nbsp;</div>
+    </div>
+  </aside>
+  <main id=main>
+
+    <!-- ══ STATUS ══════════════════════════════════════════════════════ -->
+    <section class=view id=view-status hidden>
+      <h1>STATUS</h1>
+      <p class=lede>Plant a synthetic patient record no legitimate task needs to transmit.
+        If those exact bytes appear in an outbound tool argument addressed to the attacker
+        host, exfiltration happened <b>by construction</b> — not by an LLM judge's opinion.</p>
+
+      <div class=panel id=readyCard>
+        <span class=lbl>state</span>
+        <div class=row style="justify-content:space-between;align-items:flex-start">
+          <div>
+            <div class=big id=readyBig>&hellip;</div>
+            <div class=mut id=readySub style="margin-top:8px;max-width:64ch"></div>
+          </div>
+          <div style="text-align:right">
+            <button class="btn primary stage" id=btnRunDemo>&#9654; RUN DEMO</button>
+            <div class=dimmer style="margin-top:8px;font-size:12px">
+              offline cached replay &middot; 0 API calls &middot; no keys needed</div>
+          </div>
+        </div>
+      </div>
+
+      <div class=grid2>
+        <div class=panel>
+          <span class=lbl>providers</span>
+          <div id=provList class=mut>&hellip;</div>
+          <div class=dimmer style="margin-top:12px;font-size:12.5px">
+            Keys are needed only for a LIVE run. The demo and results views replay
+            bundled cached results.</div>
+        </div>
+        <div>
+          <div class=panel>
+            <span class=lbl>call budget</span>
+            <div class=row style="justify-content:space-between">
+              <div class=big id=callsBig>&hellip;</div>
+              <div class=mut style="text-align:right;font-size:13px" id=callsSub></div>
+            </div>
+            <div class=bar style="margin-top:12px"><i id=callsBar style="width:0"></i></div>
+          </div>
+          <div class=panel>
+            <span class=lbl>setup</span>
+            <dl class=kv id=setupKv></dl>
+          </div>
+        </div>
+      </div>
+
+      <div class=panel>
+        <span class=lbl>the method, in three lines</span>
+        <pre class=mut>&#9500;&#9472; plant   a synthetic record (<span class=ok id=m1canary></span>) in the agent's workflow
+&#9500;&#9472; attack  16 realistic injected payloads &mdash; 4 channels &times; 4 obfuscation variants
+&#9492;&#9472; score   the record's bytes in an outbound argument addressed to the attacker
+          host, across 7 recoverability-preserving encodings. 21/21 oracle tests,
+          0/16 false positives on the matched benign control arm.</pre>
+      </div>
+    </section>
+
+    <!-- ══ SETUP ═══════════════════════════════════════════════════════ -->
+    <section class=view id=view-setup hidden>
+      <h1>SETUP</h1>
+      <div class=stub>&mdash; next commit &mdash;</div>
+    </section>
+
+    <!-- ══ VERIFY ══════════════════════════════════════════════════════ -->
+    <section class=view id=view-verify hidden>
+      <h1>VERIFY</h1>
+      <div class=stub>&mdash; next commit &mdash;</div>
+    </section>
+
+    <!-- ══ DEMO / RUN ══════════════════════════════════════════════════ -->
+    <section class=view id=view-demo hidden>
+      <h1>DEMO / RUN</h1>
+      <div class=stub>&mdash; next commit &mdash;</div>
+    </section>
+
+    <!-- ══ RESULTS ═════════════════════════════════════════════════════ -->
+    <section class=view id=view-results hidden>
+      <h1>RESULTS</h1>
+      <div class=stub>&mdash; next commit &mdash;</div>
+    </section>
+
+  </main>
+</div>
+<div id=toast></div>
+
+<script>
+"use strict";
+/* ═══ bridge ════════════════════════════════════════════════════════════════
+   The token is injected server-side. It is stripped from the address bar so it
+   does not linger there in browser-fallback mode.                          */
+const PHI = {token:"__PHI_TOKEN__", port:"__PHI_PORT__"};
+try{
+  if (location.search) history.replaceState(null, "", location.pathname + location.hash);
+}catch(e){}
+
+const $  = (s, r) => (r||document).querySelector(s);
+const $$ = (s, r) => Array.from((r||document).querySelectorAll(s));
+const el = (tag, cls, txt) => { const n = document.createElement(tag);
+  if (cls) n.className = cls; if (txt != null) n.textContent = txt; return n; };
+const pct = x => (x == null || Number.isNaN(x)) ? "—" : Math.round(x*100) + "%";
+
+async function api(path, opts){
+  const o = Object.assign({headers:{}}, opts||{});
+  o.headers["X-Phi-Token"] = PHI.token;
+  if (o.json !== undefined){ o.method = o.method || "POST";
+    o.headers["Content-Type"] = "application/json"; o.body = JSON.stringify(o.json); }
+  const r = await fetch(path, o);
+  if (o.raw) return r;
+  const txt = await r.text();
+  let data = null;
+  try{ data = txt ? JSON.parse(txt) : null; }catch(e){ throw new Error(txt.slice(0,300)); }
+  if (!r.ok) throw new Error((data && data.error) || ("HTTP " + r.status));
+  return data;
+}
+
+function toast(msg, bad){
+  const n = el("div", bad ? "bad" : "", msg);
+  $("#toast").appendChild(n);
+  setTimeout(() => { n.style.opacity = "0"; n.style.transition = "opacity .4s";
+    setTimeout(() => n.remove(), 420); }, bad ? 7000 : 3600);
+}
+
+/* ═══ router ════════════════════════════════════════════════════════════════ */
+const VIEWS = ["status","setup","verify","demo","results"];
+const onEnter = {};                       /* view -> hook, filled in by each view */
+let current = null;
+
+function show(view, opts){
+  if (!VIEWS.includes(view)) view = "status";
+  current = view;
+  VIEWS.forEach(v => { const n = $("#view-" + v); if (n) n.hidden = (v !== view); });
+  $$("#nav button").forEach(b =>
+    b.setAttribute("aria-current", String(b.dataset.view === view)));
+  try{ localStorage.setItem("phi.view", view); }catch(e){}
+  if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view);
+  $("#main").scrollTop = 0;
+  if (onEnter[view]) onEnter[view](opts || {});
+}
+$$("#nav button").forEach(b => b.addEventListener("click", () => show(b.dataset.view)));
+window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+
+/* ═══ scanlines: OFF by default ═════════════════════════════════════════════ */
+const crtBox = $("#crtToggle");
+function applyCrt(on){ document.body.classList.toggle("crt", !!on); crtBox.checked = !!on;
+  try{ localStorage.setItem("phi.crt", on ? "1" : "0"); }catch(e){} }
+crtBox.addEventListener("change", () => applyCrt(crtBox.checked));
+applyCrt((() => { try{ return localStorage.getItem("phi.crt") === "1"; }catch(e){ return false; } })());
+
+/* ═══ STATUS ════════════════════════════════════════════════════════════════ */
+let STATUS = null;
+
+function renderStatus(s){
+  STATUS = s;
+  const needs = [];
+  if (!s.adapter_exists) needs.push("the adapter file in your setup is missing");
+  if (s.configured && !s.verify_passed) needs.push("verify has not passed for this setup");
+  const ready = s.cached_results_available && s.adapter_exists;
+  $("#readyBig").textContent = ready ? (needs.length ? "READY · DEMO" : "READY") : "NEEDS SETUP";
+  $("#readyBig").className = "big " + (ready && !needs.length ? "ok" : (ready ? "amber" : "bad"));
+  $("#readySub").innerHTML = ready
+    ? (needs.length
+        ? "Cached results are present, so the demo and results views work now. Before a "
+          + "<b>scored</b> run: " + needs.join("; ") + "."
+        : "Cached study results present (" + s.cached_rows + " cells) and verify has passed for "
+          + "this setup. The demo runs offline with no keys; a scored run is unblocked.")
+    : "No cached results found and no live setup. Point <code>--config</code> at a "
+      + "phi-canary.yaml, or reinstall the package so the bundled results are available.";
+
+  const pl = $("#provList"); pl.textContent = "";
+  (s.providers || []).forEach(p => {
+    const row = el("div", "row");
+    row.style.margin = "7px 0";
+    row.appendChild(el("i", "dot " + (p.live ? "live" : (p.key_present ? "dead" : ""))));
+    const name = el("span", null, p.name);
+    name.style.width = "8ch"; name.style.color = "#EAFFF0";
+    row.appendChild(name);
+    row.appendChild(el("span", "tag " + (p.live ? "ok" : ""), p.live ? "live"
+      : (p.key_present ? "key set · probe failed" : "no key")));
+    row.appendChild(el("span", "dimmer", p.models.join(", ")));
+    pl.appendChild(row);
+    if (!p.key_present){
+      const s2 = el("div", "dimmer", "  └─ set " + p.key_env + " · get a key: " + p.signup_url);
+      s2.style.fontSize = "12.5px"; s2.style.marginLeft = "19px"; s2.style.userSelect = "all";
+      pl.appendChild(s2);
+    }
+  });
+  if (!(s.providers || []).length) pl.textContent = "no providers configured";
+
+  $("#callsBig").textContent = s.calls_used + " / " + s.call_budget;
+  $("#callsBig").className = "big";
+  $("#callsSub").innerHTML = "API calls spent<br><span class=dimmer>study closed · "
+    + (s.call_budget - s.calls_used) + " left</span>";
+  $("#callsBar").style.width = Math.min(100, 100*s.calls_used/s.call_budget) + "%";
+
+  const kv = $("#setupKv"); kv.textContent = "";
+  const rows = [
+    ["adapter", s.setup.adapter],
+    ["egress tools", (s.setup.egress_tools || []).join(", ")],
+    ["attacker host", s.setup.attacker_host],
+    ["canary", s.setup.canary_id],
+    ["config", s.config_source],
+    ["fingerprint", s.fingerprint],
+    ["verify", s.verify_passed ? ("passed " + (s.verify_ts || "")) : "NOT passed"],
+  ];
+  rows.forEach(([k, v]) => { kv.appendChild(el("dt", null, k));
+    const dd = el("dd", null, String(v == null ? "—" : v));
+    if (k === "verify") dd.className = s.verify_passed ? "ok" : "bad";
+    kv.appendChild(dd); });
+  $("#m1canary").textContent = s.canary_id;
+  $("#railfp").textContent = "setup " + s.fingerprint;
+}
+
+async function loadStatus(){
+  try{ renderStatus(await api("/api/status")); }
+  catch(e){ toast("status failed: " + e.message, true); }
+}
+onEnter.status = loadStatus;
+$("#btnRunDemo").addEventListener("click", () => show("demo", {autoplay:true}));
+
+/* ═══ boot ══════════════════════════════════════════════════════════════════ */
+(function(){
+  let v = location.hash.slice(1);
+  if (!VIEWS.includes(v)){ try{ v = localStorage.getItem("phi.view") || "status"; }
+    catch(e){ v = "status"; } }
+  show(v);
+  loadStatus();
+})();
+</script>
+</body>
+</html>
