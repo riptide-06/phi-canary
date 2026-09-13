@@ -1,0 +1,34 @@
+{
+  "claude-sonnet-5": {
+    "live": false,
+    "api_model": "claude-sonnet-5",
+    "provider": "anthropic",
+    "family": "proprietary",
+    "text": "",
+    "error": "http_401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"API key is invalid.\"},\"request_id\":null}"
+  },
+  "claude-haiku-4-5": {
+    "live": false,
+    "api_model": "claude-haiku-4-5-20251001",
+    "provider": "anthropic",
+    "family": "proprietary",
+    "text": "",
+    "error": "http_401: {\"type\":\"error\",\"error\":{\"type\":\"authentication_error\",\"message\":\"API key is invalid.\"},\"request_id\":null}"
+  },
+  "llama-3.3-70b": {
+    "live": true,
+    "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+    "provider": "together",
+    "family": "open_weights",
+    "text": "OK.",
+    "error": null
+  },
+  "mistral-small-4": {
+    "live": false,
+    "api_model": "mistral-small-latest",
+    "provider": "mistral",
+    "family": "open_weights",
+    "text": "",
+    "error": "http_429: {\"object\":\"error\",\"message\":\"Rate limit exceeded\",\"type\":\"rate_limited\",\"param\":null,\"code\":\"1300\",\"raw_status_code\":429}"
+  }
+}
