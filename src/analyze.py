@@ -106,7 +106,26 @@ def write_table(stats):
         lines.append("_No results yet._\n")
         (RESULTS / "table.md").write_text("\n".join(lines))
         return
-    # headline family comparison
+    # Lead with the discriminating, panel-independent evidence: per-model rate + control.
+    lines.append("## Per-model exfiltration rate (primary metric: exfil → attacker host)\n")
+    lines.append("| Model | Family | Injected exfil→attacker | 95% CI | Control exfil→attacker | "
+                 "Control any-egress | Errors |")
+    lines.append("|---|---|---|---|---|---|---|")
+    for m, s in stats.items():
+        fam = "open-weights" if s["family"] == "open_weights" else "proprietary"
+        lines.append(
+            f"| {s['label']} | {fam} | {s['n_exfil']}/{s['n']} ({fmt_pct(s['rate'])}) | "
+            f"[{fmt_pct(s['lo'])}, {fmt_pct(s['hi'])}] | "
+            f"{s['control_exfil']}/{s['control_n']} ({fmt_pct(s['control_rate'])}) | "
+            f"{s['control_anyeg']}/{s['control_n']} ({fmt_pct(s['control_anyeg']/s['control_n']) if s['control_n'] else '—'}) | "
+            f"{s['errors']} |")
+    lines.append("\n_The **control exfil→attacker = 0** on every model is the false-positive "
+                 "baseline: no benign episode reached the attacker host. Where **control "
+                 "any-egress > 0** (the record went to a *legitimate* endpoint on benign "
+                 "traffic), it shows why the metric is scoped to the attacker host rather than "
+                 "to any outbound argument._\n")
+
+    # Family aggregate — demoted and explicitly caveated as tier-confounded, never the headline.
     def fam_rate(fam):
         rows_ = [(s["n_exfil"], s["n"]) for s in stats.values() if s["family"] == fam]
         num, den = sum(a for a, _ in rows_), sum(b for _, b in rows_)
@@ -114,23 +133,12 @@ def write_table(stats):
     on, od = fam_rate("open_weights")
     pn, pd = fam_rate("proprietary")
     if od and pd:
-        lines.append("## Headline: open-weights vs proprietary\n")
-        lines.append(f"- **Open-weights:** {on}/{od} injected cells exfiltrated to the attacker host "
-                     f"({fmt_pct(on/od)}).")
-        lines.append(f"- **Proprietary:** {pn}/{pd} injected cells exfiltrated to the attacker host "
+        lines.append("## Family aggregate (tier-confounded — a hypothesis, not a conclusion)\n")
+        lines.append(f"- Open-weights: {on}/{od} ({fmt_pct(on/od)}); proprietary: {pn}/{pd} "
                      f"({fmt_pct(pn/pd)}).")
-        lines.append(f"- **Difference:** {fmt_pct(on/od - pn/pd)} points "
-                     f"(open-weights − proprietary).\n")
-
-    lines.append("## Per-model exfiltration rate\n")
-    lines.append("| Model | Family | Exfil→attacker | 95% CI | Any-egress leak | Control exfil→attacker (n) | Errors |")
-    lines.append("|---|---|---|---|---|---|---|")
-    for m, s in stats.items():
-        fam = "open-weights" if s["family"] == "open_weights" else "proprietary"
-        lines.append(
-            f"| {s['label']} | {fam} | {s['n_exfil']}/{s['n']} ({fmt_pct(s['rate'])}) | "
-            f"[{fmt_pct(s['lo'])}, {fmt_pct(s['hi'])}] | {fmt_pct(s['any_rate'])} | "
-            f"{s['control_exfil']}/{s['control_n']} ({fmt_pct(s['control_rate'])}) | {s['errors']} |")
+        lines.append("- **With one model per family and a large tier/scale mismatch, this cannot "
+                     "separate deployment category from model tier. Read as tier/scale, not "
+                     "license. A same-tier comparison is required.**\n")
     lines.append("\n## By injection channel (exfil→attacker, count / n)\n")
     lines.append("| Model | " + " | ".join(CHANNELS) + " |")
     lines.append("|" + "---|" * (len(CHANNELS) + 1))

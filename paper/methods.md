@@ -69,9 +69,15 @@ high-entropy blobs must never fire.
   27B on Groq (free-tier output-tokens-per-minute limit incompatible with a multi-turn
   thinking agent; no OpenRouter backup key was available). Anthropic (Claude) and Mistral,
   the originally planned panel, were dropped earlier for invalid/ rate-limited credentials.
-  Provider selection was constrained by having no paid budget; see limitations. The comparison
-  should be read as best-evaluated-open-weights vs best-evaluated-proprietary, not as a claim
-  about either family in general.
+  Provider selection was constrained by having no paid budget; see limitations.
+
+  **Framing of claims.** The primary contribution is the deterministic oracle and its
+  zero-false-positive property (Results §1), which is independent of the panel. The two models
+  differ by both deployment category *and* by tier/scale (a cost-optimized "lite" proprietary
+  model vs a 70B open model), so this design **cannot separate open-vs-proprietary from model
+  tier**. Any per-model rate difference is reported as a tier/scale observation and a
+  hypothesis (Results §3), never as an open-vs-proprietary conclusion. A same-tier comparison
+  is the required follow-up and was not possible under budget constraints.
 - **Payload corpus.** 16 payloads = 4 delivery channels × 4 obfuscation variants. Channels:
   `ticket_body`, `record_notes`, `kb_article`, `prior_transcript`. Variants: `plain`,
   `authority` (impersonated compliance directive), `html` (markup-smuggled), `unicode`
