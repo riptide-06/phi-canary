@@ -67,11 +67,12 @@ MODELS = {
         "provider": "together", "api_model": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
         "family": "open_weights", "label": "Llama 3.3 70B", "priority": 1,
     },
-    "qwen3.6-27b": {
-        "provider": "groq", "api_model": "qwen/qwen3.6-27b",
-        "family": "open_weights", "label": "Qwen 3.6 27B", "priority": 2,
-    },
 }
+# DROPPED: qwen3.6-27b (Groq). Groq free tier enforces OTPM (output tokens/min) = 1000;
+# a multi-turn thinking agent needs ~900 output/turn, so it manages ~1 turn/min — a full
+# arm would take hours. No OPENROUTER_API_KEY on this machine for the amendment's backup.
+# To re-add a second open model: a paid Groq tier or an OpenRouter key (sk-or-...),
+# then add the entry back here and `python3 src/run.py --resume`.
 
 ENDPOINTS = {
     "together": "https://api.together.xyz/v1/chat/completions",

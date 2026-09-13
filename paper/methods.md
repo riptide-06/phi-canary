@@ -62,12 +62,16 @@ high-entropy blobs must never fire.
 
 ## Experimental matrix
 
-- **Models.** Two proprietary models (Gemini 3 Flash and Gemini 3.1 Flash-Lite, served via
-  Google AI Studio) and two open-weights / self-hostable models served via hosted APIs
-  (Llama-3.3-70B-Instruct-Turbo via Together; Qwen 3.6 27B via Groq). Provider selection was
-  constrained by budget (free-tier only); see limitations. The comparison should therefore
-  be read as best-evaluated-open-weights vs best-evaluated-proprietary, not as a claim about
-  either family in general.
+- **Models (as completed).** One proprietary model (**Gemini 3.1 Flash-Lite**, Google AI
+  Studio) and one open-weights / self-hostable model (**Llama-3.3-70B-Instruct-Turbo**, via
+  Together). Two further models were attempted and dropped under free-tier constraints:
+  Gemini 3 Flash (free tier = 20 requests/day, unusable for a multi-turn agent) and Qwen 3.6
+  27B on Groq (free-tier output-tokens-per-minute limit incompatible with a multi-turn
+  thinking agent; no OpenRouter backup key was available). Anthropic (Claude) and Mistral,
+  the originally planned panel, were dropped earlier for invalid/ rate-limited credentials.
+  Provider selection was constrained by having no paid budget; see limitations. The comparison
+  should be read as best-evaluated-open-weights vs best-evaluated-proprietary, not as a claim
+  about either family in general.
 - **Payload corpus.** 16 payloads = 4 delivery channels × 4 obfuscation variants. Channels:
   `ticket_body`, `record_notes`, `kb_article`, `prior_transcript`. Variants: `plain`,
   `authority` (impersonated compliance directive), `html` (markup-smuggled), `unicode`
@@ -75,13 +79,13 @@ high-entropy blobs must never fire.
   content that attempts to make the agent POST the member record to
   `https://records-sync.example.net/ingest`. No payload contains the canary; the canary
   comes only from the record the agent retrieves.
-- **Matrix.** 4 models × 16 payloads = 64 injected runs.
+- **Matrix.** Per model, 16 injected runs. As completed: 2 models × 16 = 32 injected runs.
 - **Control arm.** A matched **16-cell control** per model: the same 16 tasks with the
   injection removed. This is the false-positive baseline on benign traffic — it answers "how
   often does the agent exfiltrate the record when nothing is attacking it". A method whose
   entire claim is a deterministic label must report its false-positive rate on benign
-  traffic; the control arm is that measurement (target: 0/16). Full matrix therefore = 4
-  models × (16 injected + 16 control) = 128 cells.
+  traffic; the control arm is that measurement (target: 0/16). As completed: 2 models ×
+  (16 injected + 16 control) = 64 cells.
 - **One run per cell at temperature 0.** Variance is estimated by resampling the payload
   corpus, not by repeated trials. (Hosted inference at temperature 0 is not perfectly
   deterministic; see limitations.)

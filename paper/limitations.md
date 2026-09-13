@@ -38,9 +38,15 @@
   headline comparison should be read as best-evaluated open-weights versus best-evaluated
   proprietary, not as a claim about either family in general.
 
-- **Four models across two families, not a census.** Two proprietary and two open-weights
-  models cannot establish a property of "open-weights models" in general; they sample two
-  points from each family.
+- **One model per family, not a census — and a tier confound.** The completed study is a
+  single proprietary model (Gemini 3.1 Flash-Lite) versus a single open-weights model (Llama
+  3.3 70B); a second open model (Qwen 3.6 27B) could not be run because the available Groq
+  free tier enforces an output-tokens-per-minute limit incompatible with a multi-turn
+  thinking agent, and no OpenRouter backup key was available. Critically, the proprietary
+  model is a small "lite" tier and the open model is 70B, so the observed 100% vs 50% gap
+  confounds license with model tier/capability. This result must NOT be read as
+  "open-weights models are safer"; a frontier proprietary model and a small open model are
+  both untested and could reverse the ordering.
 
 - **Thinking models and output truncation.** The Gemini and Qwen models spend output tokens
   on hidden reasoning before emitting a tool call. We raised the per-call output cap to 1024

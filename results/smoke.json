@@ -14,13 +14,5 @@
     "family": "open_weights",
     "text": "OK.",
     "error": null
-  },
-  "qwen3.6-27b": {
-    "live": true,
-    "api_model": "qwen/qwen3.6-27b",
-    "provider": "groq",
-    "family": "open_weights",
-    "text": "<think>\nHere's a thinking process:\n\n1.  **Analyze User Input",
-    "error": null
   }
 }

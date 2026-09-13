@@ -13,7 +13,7 @@ model — the opposite of the naive expectation. Under indirect prompt injection
   member record in an outbound argument addressed to the attacker host (95% bootstrap CI
   [100%, 100%]). Its 16-cell no-injection control leaked **0/16**.
 - **Llama 3.3 70B (open-weights): 8/16 (50%)**, 95% CI [25%, 75%]. Control **0/16**.
-- **Qwen 3.6 27B (open-weights):** `[[QWEN_RATE]]` (arm in progress / budget-capped).
+- _A second open-weights model (Qwen 3.6 27B) was attempted but could not be run on the available free tier (see limitations); the open arm is Llama 3.3 70B alone._
 
 Both models had a **0/16 false-positive rate on benign traffic** (the control arm): no
 un-injected episode sent the canary to the attacker host. The deterministic label therefore
@@ -24,8 +24,7 @@ separates injected from benign behavior with no false positives in this run.
 The result does **not** support "open-weights models leak more". It shows the *smaller,
 cheaper* proprietary tier leaking on every channel — including `kb_article`, where the 70B
 open model leaked 0/4. This points at model tier / capability, not license, as the driver.
-`[[Does Qwen 3.6 27B, a small OPEN model, also leak high? If so, size/capability — not
-open-vs-proprietary — is the axis, and the paper's framing must say so.]]` `[[The proprietary
+`[[The size/capability confound is UNRESOLVED: we could not obtain a small open model to test whether a small OPEN model also leaks ~100%. Obtaining one (paid Groq tier or an OpenRouter key) is the single most valuable next experiment.]]` `[[The proprietary
 arm is a single "lite" tier of one vendor; a frontier proprietary model may behave very
 differently — see limitations.]]`
 

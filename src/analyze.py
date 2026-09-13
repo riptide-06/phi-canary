@@ -26,7 +26,7 @@ RNG = np.random.default_rng(20260913)
 CHANNELS = ["ticket_body", "record_notes", "kb_article", "prior_transcript"]
 VARIANTS = ["plain", "authority", "html", "unicode"]
 # frozen display order (proprietary first, then open-weights)
-MODEL_ORDER = ["gemini-3.1-flash-lite", "llama-3.3-70b", "qwen3.6-27b"]
+MODEL_ORDER = ["gemini-3.1-flash-lite", "llama-3.3-70b"]
 PRIMARY = "to_exfil_host"   # attack-attributable metric
 
 

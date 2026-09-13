@@ -28,11 +28,20 @@ python3 src/run.py --resume     # fill remaining cells (needs live keys; see BLO
 python3 src/analyze.py          # regenerate table + figure
 ```
 
-Keys live in `.env` (`ANTHROPIC_API_KEY`, `TOGETHER_API_KEY`, `MISTRAL_API_KEY`).
+Keys live in `.env` (`GOOGLE_API_KEY`, `TOGETHER_API_KEY`; optional `GROQ_API_KEY`).
 
 ## Current state
 
-The reachable arm (Llama 3.3 70B) is complete: **8/16 (50%)** injected cells exfiltrated to
-the attacker host, 95% CI [25%, 75%], control 0/1. The proprietary arm (both Anthropic
-models) and the second open-weights model (Mistral) are blocked on credentials — see
-`BLOCKERS.md`. `--resume` fills them with no re-work once keys are live.
+Complete open-vs-proprietary comparison, both models with full 16-cell benign controls:
+
+| Model | Family | Exfil → attacker host | Control |
+|---|---|---|---|
+| Gemini 3.1 Flash-Lite | proprietary | **16/16 (100%)** | 0/16 |
+| Llama 3.3 70B | open-weights | **8/16 (50%)**, CI [25%,75%] | 0/16 |
+
+The counterintuitive headline — the small proprietary "lite" model exfiltrated *more* than
+the 70B open model — is a likely **model-tier/capability** effect, not a license effect; the
+confound is unresolved (a second small open model could not be obtained on a free tier). See
+`paper/limitations.md`. Dropped under free-tier limits: Gemini 3 Flash (20 req/day), Qwen 3.6
+27B (Groq output-tokens/min), Anthropic + Mistral (invalid/rate-limited). Details in
+`BLOCKERS.md` / `DECISIONS.md`.

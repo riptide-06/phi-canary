@@ -19,7 +19,7 @@ def main():
     total = len(live)*32 if live else 96  # 16 injected + 16 control per live model
     blockers = 0
     bp = ROOT/"BLOCKERS.md"
-    if bp.exists(): blockers = bp.read_text().count("\n## B")
+    if bp.exists(): blockers = bp.read_text().count("\n### N")
     (ROOT/"STATUS.md").write_text(f"""LAST UPDATE: {time.strftime('%Y-%m-%d %H:%M:%S %Z')}
 CURRENT STEP: {step} — {name}
 STEPS COMPLETE: {', '.join(str(i) for i in range(step+1))}
@@ -27,7 +27,7 @@ MODELS LIVE: {', '.join(live) if live else 'NONE'}
 MODELS DEAD: {', '.join(dead) if dead else 'none'}
 API CALLS USED: {P.calls_used()}/{P.CALL_BUDGET}
 RUN PROGRESS: {cells}/{total} cells done (16 injected + 16 control per live model)
-BLOCKERS: {blockers} — see BLOCKERS.md (B1 Anthropic key invalid = proprietary arm empty)
+BLOCKERS: {blockers} open notes — see BLOCKERS.md
 NEXT COMMAND FOR HUMAN: {nxt}
 ONE-LINE SUMMARY: {summary}
 """)
