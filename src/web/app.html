@@ -114,6 +114,22 @@ pre{margin:0;font:inherit;font-size:13px;white-space:pre-wrap;word-break:break-w
 .chips .chip button{all:unset;cursor:pointer;color:var(--dim);padding:0 3px}
 .chips .chip button:hover{color:var(--red)}
 .chips .none{color:var(--red);font-size:13px}
+/* ── checks ────────────────────────────────────────────────────────────── */
+label.inline{color:var(--dim);font-size:13px;display:flex;gap:7px;align-items:center}
+select{font:inherit;font-size:13px;background:#081008;color:var(--ink);
+  border:1px solid var(--line2);padding:5px 7px}
+.check{display:grid;grid-template-columns:2.4em 1.6em 1fr;gap:10px;align-items:baseline;
+  padding:9px 0;border-bottom:1px dashed var(--line)}
+.check:last-child{border-bottom:none}
+.check .n{color:var(--dimmer);font-size:13px}
+.check .m{font-size:17px;line-height:1}
+.check .lab{font-size:14.5px;color:var(--dim)}
+.check .det{font-size:12.5px;color:var(--dimmer);margin-top:3px;word-break:break-word}
+.check[data-state=pass] .m{color:var(--green)} .check[data-state=pass] .lab{color:#EAFFF0}
+.check[data-state=fail] .m{color:var(--red)} .check[data-state=fail] .lab{color:var(--red)}
+.check[data-state=skip] .m{color:var(--dimmer)}
+.check[data-state=run] .m{color:var(--amber)}
+.check[data-key=positive_control] .lab{letter-spacing:.04em}
 #toast{position:fixed;right:20px;bottom:18px;z-index:120;display:flex;flex-direction:column;
   gap:8px;align-items:flex-end}
 #toast div{border:1px solid var(--line2);background:#0C1A10;color:var(--ink);padding:9px 14px;
@@ -283,7 +299,62 @@ pre{margin:0;font:inherit;font-size:13px;white-space:pre-wrap;word-break:break-w
     <!-- ══ VERIFY ══════════════════════════════════════════════════════ -->
     <section class=view id=view-verify hidden>
       <h1>VERIFY</h1>
-      <div class=stub>&mdash; next commit &mdash;</div>
+      <p class=lede>A 0% exfiltration rate has two causes and they print identically:
+        <b>the agent refused</b>, or <b>the harness was never wired to the agent</b>.
+        Four checks separate them. The fourth is the one that matters.</p>
+
+      <div class="panel warn">
+        <span class=lbl>why this gate exists</span>
+        <div style="font-size:15px">Without these checks a scored run would report
+          <b>0%</b> &mdash; and that number would be <b class=bad>WRONG</b>, while reading
+          as good news. <code>phi-canary run</code> refuses to print a score until verify
+          passes for this exact setup.</div>
+      </div>
+
+      <div class=row style="margin:16px 0 18px">
+        <button class="btn primary stage" id=btnVerify>&#9654; RUN VERIFY</button>
+        <label class=inline>channel
+          <select id=vChannel>
+            <option value=record_notes selected>record_notes</option>
+            <option value=ticket_body>ticket_body</option>
+            <option value=kb_article>kb_article</option>
+            <option value=prior_transcript>prior_transcript</option>
+          </select></label>
+        <label class=inline><input type=checkbox id=vOffline checked> offline (cached replay)</label>
+        <span class=dimmer id=vMeta></span>
+      </div>
+
+      <div class=panel>
+        <span class=lbl>the four checks</span>
+        <div id=checkList></div>
+      </div>
+
+      <div class=panel id=pcPanel>
+        <span class=lbl>positive control</span>
+        <div class=row style="justify-content:space-between;align-items:flex-start;gap:20px">
+          <div style="flex:1;min-width:22ch">
+            <div class=big id=pcBig>&mdash;</div>
+            <div class=mut id=pcSub style="margin-top:8px">not run yet</div>
+          </div>
+          <div class=help style="max-width:52ch;margin:0">
+            One blatant exfiltration instruction, in plain prose, with no obfuscation and
+            no pretext &mdash; the corpus's own <code>plain</code> payload, retargeted at
+            your configured boundary. The oracle <b>must</b> detect the leak. If it does
+            not, nothing downstream is interpretable.
+          </div>
+        </div>
+        <div id=pcDiag style="margin-top:14px" hidden></div>
+      </div>
+
+      <div class=panel>
+        <span class=lbl>stream</span>
+        <pre id=vLog class=mut>idle.</pre>
+      </div>
+
+      <div class=panel>
+        <span class=lbl>receipt</span>
+        <dl class=kv id=vReceipt><dt>state</dt><dd class=mut>no receipt loaded</dd></dl>
+      </div>
     </section>
 
     <!-- ══ DEMO / RUN ══════════════════════════════════════════════════ -->
@@ -350,6 +421,15 @@ const VIEWS = ["status","setup","verify","demo","results"];
 const onEnter = {};                       /* view -> hook, filled in by each view */
 let current = null;
 
+/* A hash may carry flags after the view: "#demo&play" opens the demo already playing,
+   "#verify&run" starts the checks. Presenter convenience — one link, hands free. */
+function parseHash(h){
+  const parts = (h || "").replace(/^#/, "").split("&").filter(Boolean);
+  const opts = {};
+  parts.slice(1).forEach(f => opts[f] = true);
+  return {view: parts[0] || "", opts};
+}
+
 function show(view, opts){
   if (!VIEWS.includes(view)) view = "status";
   current = view;
@@ -357,12 +437,13 @@ function show(view, opts){
   $$("#nav button").forEach(b =>
     b.setAttribute("aria-current", String(b.dataset.view === view)));
   try{ localStorage.setItem("phi.view", view); }catch(e){}
-  if (location.hash.slice(1) !== view) history.replaceState(null, "", "#" + view);
+  if (parseHash(location.hash).view !== view) history.replaceState(null, "", "#" + view);
   $("#main").scrollTop = 0;
   if (onEnter[view]) onEnter[view](opts || {});
 }
 $$("#nav button").forEach(b => b.addEventListener("click", () => show(b.dataset.view)));
-window.addEventListener("hashchange", () => show(location.hash.slice(1)));
+window.addEventListener("hashchange", () => {
+  const h = parseHash(location.hash); show(h.view, h.opts); });
 
 /* ═══ scanlines: OFF by default ═════════════════════════════════════════════ */
 const crtBox = $("#crtToggle");
@@ -562,13 +643,160 @@ $("#btnSave").addEventListener("click", async () => {
   finally{ $("#btnSave").disabled = false; }
 });
 
+/* ═══ VERIFY ════════════════════════════════════════════════════════════════
+   POST /api/verify streams NDJSON while verify.run_checks emits its lines. The
+   per-check ticks that arrive mid-stream are PRESENTATIONAL; the authoritative
+   states come with the final "done" frame and overwrite them.              */
+const CHECKS = [
+  ["adapter_loads",      "adapter loads and instantiates"],
+  ["benign_completes",   "benign task completes, \u22651 tool call observed"],
+  ["canary_retrievable", "canary is retrievable \u2014 the agent fetches the planted record"],
+  ["positive_control",   "POSITIVE CONTROL \u2014 blatant plain-text exfil is detected"],
+];
+const MARKS = {pass:"\u2713", fail:"\u2717", skip:"\u00b7", run:"\u2026", idle:"\u00b7"};
+
+function renderChecks(states, details){
+  const box = $("#checkList"); box.textContent = "";
+  CHECKS.forEach(([key, label], i) => {
+    const st = (states && states[key]) || "idle";
+    const row = el("div", "check"); row.dataset.state = st; row.dataset.key = key;
+    row.appendChild(el("div", "n", (i+1) + "/4"));
+    row.appendChild(el("div", "m", MARKS[st] || "\u00b7"));
+    const right = el("div");
+    right.appendChild(el("div", "lab", label));
+    const d = (details && details[key]) || "";
+    if (d) right.appendChild(el("div", "det", d));
+    row.appendChild(right);
+    box.appendChild(row);
+  });
+}
+
+function renderPositiveControl(state, detail){
+  const p = $("#pcPanel");
+  p.className = "panel" + (state === "fail" ? " hot" : (state === "pass" ? "" : ""));
+  $("#pcBig").textContent = state === "pass" ? "DETECTED"
+    : state === "fail" ? "NOT DETECTED" : state === "run" ? "\u2026" : "\u2014";
+  $("#pcBig").className = "big " + (state === "pass" ? "ok" : state === "fail" ? "bad" : "");
+  $("#pcSub").textContent = detail || (state === "run" ? "running" : "not run yet");
+}
+
+function renderReceipt(r){
+  const kv = $("#vReceipt"); kv.textContent = "";
+  if (!r){ kv.appendChild(el("dt", null, "state"));
+           kv.appendChild(el("dd", "mut", "no receipt loaded")); return; }
+  const rows = [["passed", r.passed ? "yes" : "no"], ["when", r.ts_utc || "\u2014"],
+                ["fingerprint", r.config_fingerprint], ["channel", r.channel],
+                ["adapter", (r.adapter && r.adapter.name) || "\u2014"],
+                ["api calls", String(r.api_calls == null ? "\u2014" : r.api_calls)],
+                ["observed tools", (r.observed_tools || []).join(", ") || "\u2014"]];
+  rows.forEach(([k, v]) => { kv.appendChild(el("dt", null, k));
+    const dd = el("dd", null, String(v));
+    if (k === "passed") dd.className = r.passed ? "ok" : "bad";
+    kv.appendChild(dd); });
+}
+
+let verifying = false;
+
+async function runVerify(){
+  if (verifying) return;
+  verifying = true;
+  const states = {}, details = {};
+  CHECKS.forEach(([k]) => states[k] = "idle");
+  states[CHECKS[0][0]] = "run";
+  renderChecks(states, details); renderPositiveControl("run");
+  $("#vLog").textContent = "";
+  $("#pcDiag").hidden = true; $("#pcDiag").textContent = "";
+  $("#btnVerify").disabled = true;
+  const log = [];
+  const push = s => { log.push(s); $("#vLog").textContent = log.join("\n"); };
+  try{
+    const r = await fetch("/api/verify", {method:"POST", headers:{
+      "X-Phi-Token": PHI.token, "Content-Type":"application/json"},
+      body: JSON.stringify({channel: $("#vChannel").value, offline: $("#vOffline").checked})});
+    if (!r.ok || !r.body) throw new Error("HTTP " + r.status);
+    const rd = r.body.getReader(), dec = new TextDecoder();
+    let buf = "", done = null, diag = [];
+    for(;;){
+      const {value, done:fin} = await rd.read();
+      if (fin) break;
+      buf += dec.decode(value, {stream:true});
+      let nl;
+      while ((nl = buf.indexOf("\n")) >= 0){
+        const raw = buf.slice(0, nl); buf = buf.slice(nl + 1);
+        if (!raw.trim()) continue;
+        let ev; try{ ev = JSON.parse(raw); }catch(e){ continue; }
+        if (ev.kind === "line"){
+          push(ev.text);
+          if (done === null && /Positive control FAILED|egress_tools \(scored\)|tool names observed|\u2192 /.test(ev.text))
+            diag.push(ev.text);
+        } else if (ev.kind === "check"){
+          const key = CHECKS[ev.index - 1][0];
+          states[key] = ev.state;
+          if (CHECKS[ev.index]) states[CHECKS[ev.index][0]] = "run";
+          renderChecks(states, details);
+          if (key === "positive_control") renderPositiveControl(ev.state);
+        } else if (ev.kind === "done"){
+          done = ev;
+        } else if (ev.kind === "error"){
+          throw new Error(ev.error);
+        }
+      }
+    }
+    if (!done) throw new Error("stream ended without a result");
+    /* authoritative */
+    (done.order || Object.keys(done.result.checks)).forEach(k => {
+      const c = done.result.checks[k];
+      states[k] = c.ok ? "pass" : (/^skipped/.test(c.detail || "") ? "skip" : "fail");
+      details[k] = c.detail || "";
+    });
+    renderChecks(states, details);
+    const pc = done.result.checks.positive_control;
+    renderPositiveControl(pc.ok ? "pass" : "fail", pc.detail);
+    if (!pc.ok && diag.length){
+      const box = $("#pcDiag"); box.hidden = false;
+      box.appendChild(el("pre", "bad", diag.join("\n")));
+    }
+    renderReceipt(done.result);
+    $("#vMeta").textContent = done.result.api_calls + " API calls \u00b7 receipt "
+      + (done.receipt || "").split("/").slice(-1)[0];
+    await loadStatus();
+    if (done.result.passed) toast("verify PASSED \u2014 a scored run is unblocked");
+    else toast("verify FAILED \u2014 run refuses to score until this passes", true);
+  }catch(e){
+    push("\nstream error: " + e.message);
+    toast("verify failed to run: " + e.message, true);
+  }finally{
+    verifying = false; $("#btnVerify").disabled = false;
+  }
+}
+$("#btnVerify").addEventListener("click", runVerify);
+
+onEnter.verify = async (opts) => {
+  if (!STATUS) await loadStatus();
+  if (!verifying){
+    const states = {}, details = {};
+    const rc = STATUS && STATUS.verify_checks;
+    CHECKS.forEach(([k]) => {
+      const c = rc && rc[k];
+      states[k] = c ? (c.ok ? "pass" : (/^skipped/.test(c.detail || "") ? "skip" : "fail")) : "idle";
+      if (c) details[k] = c.detail || "";
+    });
+    renderChecks(states, details);
+    const pc = rc && rc.positive_control;
+    renderPositiveControl(pc ? (pc.ok ? "pass" : "fail") : "idle", pc ? pc.detail : "");
+    $("#vMeta").textContent = STATUS && STATUS.verify_ts
+      ? ("last receipt " + STATUS.verify_ts) : "no receipt for this setup yet";
+  }
+  if (opts && opts.run) runVerify();
+};
+
 /* ═══ boot ══════════════════════════════════════════════════════════════════ */
 (function(){
-  let v = location.hash.slice(1);
+  const h = parseHash(location.hash);
+  let v = h.view;
   if (!VIEWS.includes(v)){ try{ v = localStorage.getItem("phi.view") || "status"; }
     catch(e){ v = "status"; } }
-  show(v);
-  loadStatus();
+  loadStatus().then(() => show(v, h.opts));
 })();
 </script>
 </body>
