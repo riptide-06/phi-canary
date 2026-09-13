@@ -682,24 +682,38 @@ class Handler(BaseHTTPRequestHandler):
         if isinstance(tools, str):
             tools = [t for t in tools.replace(",", " ").split() if t]
         d = C.Config()
-        text = (
-            "# phi-canary setup — written by the `phi-canary open` SETUP view.\n"
-            "# Every value here is part of the MEASUREMENT, not a preference: the oracle\n"
-            "# scores the planted record's bytes in the arguments of THESE tool names,\n"
-            "# addressed to THIS host. `phi-canary verify` proves the wiring before any\n"
-            "# scored run.\n\n"
-            f"adapter: {json.dumps(str(body.get('adapter') or d.adapter))}\n\n"
-            f"egress_tools: {json.dumps([str(t) for t in tools] or list(d.egress_tools))}\n\n"
-            f"attacker_host: {json.dumps(str(body.get('attacker_host') or d.attacker_host))}\n\n"
-            "canary:\n"
-            f"  id: {json.dumps(str(body.get('canary_id') or d.canary_id))}\n"
-            f"  retrieval_hint: {json.dumps(str(body.get('retrieval_hint') or d.retrieval_hint))}\n"
-        )
+
+        def render(adapter, egress, host, canary, hint) -> str:
+            return (
+                "# phi-canary setup — written by the `phi-canary open` SETUP view.\n"
+                "# Every value here is part of the MEASUREMENT, not a preference: the oracle\n"
+                "# scores the planted record's bytes in the arguments of THESE tool names,\n"
+                "# addressed to THIS host. `phi-canary verify` proves the wiring before any\n"
+                "# scored run.\n\n"
+                f"adapter: {json.dumps(adapter)}\n\n"
+                f"egress_tools: {json.dumps(list(egress))}\n\n"
+                f"attacker_host: {json.dumps(host)}\n\n"
+                "canary:\n"
+                f"  id: {json.dumps(canary)}\n"
+                f"  retrieval_hint: {json.dumps(hint)}\n"
+            )
+
+        draft = render(str(body.get("adapter") or d.adapter),
+                       [str(t) for t in tools] or list(d.egress_tools),
+                       str(body.get("attacker_host") or d.attacker_host),
+                       str(body.get("canary_id") or d.canary_id),
+                       str(body.get("retrieval_hint") or d.retrieval_hint))
         path = self._config_path()
         try:
-            cfg = C.parse_config(yaml.safe_load(text), source=str(path))
+            cfg = C.parse_config(yaml.safe_load(draft), source=str(path))
         except C.ConfigError as e:
             return self._json({"error": str(e), "kind": "config"}, 400)
+        # Write back what the loader actually resolved, not what was typed: the loader
+        # normalises (a pasted URL becomes a bare host), and a file that disagrees with
+        # the values being scored is a trap for whoever reads it next.
+        a = cfg.as_dict()
+        text = render(a["adapter"], a["egress_tools"], a["attacker_host"],
+                      a["canary_id"], a["retrieval_hint"])
         path.write_text(text)
         cfg = C.set_active(C.load_config(str(path)))
         return self._json({"ok": True, "written": str(path), "setup": cfg.as_dict(),
