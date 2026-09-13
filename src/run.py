@@ -23,9 +23,6 @@ import yaml
 from agent import run_episode
 
 ROOT = P.ROOT
-RESULTS = ROOT / "results"
-LOGS = ROOT / "logs"
-RAW = RESULTS / "raw.jsonl"
 _write_lock = threading.Lock()
 
 
@@ -35,7 +32,7 @@ def load_payloads() -> list[dict]:
     the answer to "how often does the agent exfiltrate when nothing is attacking it".
     """
     inj = []
-    for f in sorted((ROOT / "payloads").glob("*.yaml")):
+    for f in sorted(P.data_read("payloads").glob("*.yaml")):
         d = yaml.safe_load(f.read_text())
         d["condition"] = "injected"
         inj.append(d)
@@ -51,8 +48,9 @@ def load_payloads() -> list[dict]:
 
 def completed_cells() -> set[tuple[str, str]]:
     done = set()
-    if RAW.exists():
-        for line in RAW.read_text().splitlines():
+    raw = P.data_read("results/raw.jsonl")
+    if raw.exists():
+        for line in raw.read_text().splitlines():
             if not line.strip():
                 continue
             try:
@@ -66,14 +64,12 @@ def completed_cells() -> set[tuple[str, str]]:
 
 def append_raw(record: dict) -> None:
     with _write_lock:
-        RESULTS.mkdir(parents=True, exist_ok=True)
-        with RAW.open("a") as fh:
+        with P.data_write("results/raw.jsonl").open("a") as fh:
             fh.write(json.dumps(record) + "\n")
 
 
 def log_cell(model_key: str, ep: dict, verdict: dict) -> None:
-    LOGS.mkdir(parents=True, exist_ok=True)
-    p = LOGS / f"{model_key}__{ep['payload_id']}.jsonl"
+    p = P.data_write(f"logs/{model_key}__{ep['payload_id']}.jsonl")
     with p.open("w") as fh:
         for c in ep["tool_calls"]:
             fh.write(json.dumps({"turn": c["turn"], "tool": c["tool"], "args": c["args"]}) + "\n")
@@ -153,7 +149,7 @@ def provider_worker(model_key: str, payloads: list[dict], done: set, use_cache: 
 
 
 def live_models() -> list[str]:
-    sp = RESULTS / "smoke.json"
+    sp = P.data_read("results/smoke.json")
     if sp.exists():
         smoke = json.loads(sp.read_text())
         live = [k for k, v in smoke.items() if v.get("live")]
@@ -204,7 +200,8 @@ def main():
     with ThreadPoolExecutor(max_workers=max(1, len(by_provider))) as ex:
         list(ex.map(provider_task, by_provider.values()))
 
-    total = sum(1 for _ in RAW.open()) if RAW.exists() else 0
+    _raw = P.data_read("results/raw.jsonl")
+    total = sum(1 for _ in _raw.open()) if _raw.exists() else 0
     print(f"\ndone. raw verdict rows: {total}. calls used: {P.calls_used()}/{P.CALL_BUDGET}")
 
 

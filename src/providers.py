@@ -24,7 +24,81 @@ import time
 
 import httpx
 
-ROOT = pathlib.Path(__file__).resolve().parent.parent
+# ---------------------------------------------------------------- data location
+# Resolves data (cache/results/payloads/data) so the tool works three ways:
+#   1. in the repo checkout        -> repo root (unchanged behaviour; cache preserved)
+#   2. installed / uvx, read       -> bundled package data (ships cached results)
+#   3. installed / uvx, write      -> current dir (discoverable) or a per-user dir
+_PKG = pathlib.Path(__file__).resolve().parent          # src/  (or installed phi_canary/)
+_REPO = _PKG.parent                                      # repo root when running from src/
+_BUNDLED = _PKG / "_bundled"                             # data snapshot shipped in the wheel
+
+
+def _is_home(p: pathlib.Path) -> bool:
+    try:
+        return ((p / "payloads").is_dir() or (p / "results" / "raw.jsonl").exists()
+                or (p / "data" / "customers.json").exists())
+    except OSError:
+        return False
+
+
+def _user_home() -> pathlib.Path:
+    base = os.environ.get("XDG_DATA_HOME") or str(pathlib.Path.home() / ".local" / "share")
+    return pathlib.Path(base) / "phi-canary"
+
+
+def _read_roots() -> list[pathlib.Path]:
+    roots = []
+    env = os.environ.get("PHI_CANARY_HOME")
+    if env:
+        roots.append(pathlib.Path(env))
+    roots += [_REPO, pathlib.Path.cwd(), _user_home(), _BUNDLED]
+    seen, out = set(), []
+    for r in roots:
+        try:
+            r = pathlib.Path(r).resolve()
+        except OSError:
+            continue
+        if r not in seen:
+            seen.add(r)
+            out.append(r)
+    return out
+
+
+def write_root() -> pathlib.Path:
+    """Base dir for writes. In-repo -> repo root (cache stays put). Installed -> cwd if
+    writable, else a per-user dir."""
+    env = os.environ.get("PHI_CANARY_HOME")
+    if env:
+        p = pathlib.Path(env)
+        p.mkdir(parents=True, exist_ok=True)
+        return p
+    if _is_home(_REPO) and os.access(_REPO, os.W_OK):
+        return _REPO
+    cwd = pathlib.Path.cwd()
+    if os.access(cwd, os.W_OK):
+        return cwd
+    p = _user_home()
+    p.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+def data_read(rel: str) -> pathlib.Path:
+    """First existing copy of `rel` across read roots; falls back to the write location."""
+    for r in _read_roots():
+        cand = r / rel
+        if cand.exists():
+            return cand
+    return write_root() / rel
+
+
+def data_write(rel: str) -> pathlib.Path:
+    p = write_root() / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    return p
+
+
+ROOT = write_root()          # backward-compatible base for writes
 CACHE = ROOT / "cache"
 RESULTS = ROOT / "results"
 CALL_BUDGET = 400            # AMENDMENT cap (83 already used before the amendment)
@@ -40,7 +114,7 @@ SIGNUP_URLS = {
 
 
 def load_env() -> None:
-    env = ROOT / ".env"
+    env = data_read(".env")
     if not env.exists():
         return
     for line in env.read_text().splitlines():
@@ -142,12 +216,11 @@ def est_tokens(system: str, messages: list[dict], max_tokens: int) -> int:
 
 # ------------------------------------------------------------------ call budget
 def _budget_path() -> pathlib.Path:
-    RESULTS.mkdir(parents=True, exist_ok=True)
-    return RESULTS / "api_calls.json"
+    return data_write("results/api_calls.json")
 
 
 def calls_used() -> int:
-    p = _budget_path()
+    p = data_read("results/api_calls.json")
     if not p.exists():
         return 0
     try:
@@ -169,7 +242,7 @@ def cache_key(model_key: str, payload_id: str, turn: int) -> str:
 
 
 def cache_read(model_key: str, payload_id: str, turn: int, prompt_hash: str):
-    p = CACHE / (cache_key(model_key, payload_id, turn) + ".json")
+    p = data_read("cache/" + cache_key(model_key, payload_id, turn) + ".json")
     if not p.exists():
         return None
     try:
@@ -182,10 +255,9 @@ def cache_read(model_key: str, payload_id: str, turn: int, prompt_hash: str):
 
 
 def cache_write(model_key: str, payload_id: str, turn: int, prompt_hash: str, record: dict) -> None:
-    CACHE.mkdir(parents=True, exist_ok=True)
     blob = dict(record)
     blob["prompt_hash"] = prompt_hash
-    p = CACHE / (cache_key(model_key, payload_id, turn) + ".json")
+    p = data_write("cache/" + cache_key(model_key, payload_id, turn) + ".json")
     tmp = p.with_suffix(".tmp")
     tmp.write_text(json.dumps(blob, indent=2))
     tmp.replace(p)

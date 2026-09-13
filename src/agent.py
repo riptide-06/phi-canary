@@ -28,7 +28,7 @@ MAX_TURNS = 6
 
 TICKET_ID = "TKT-88231"
 
-CUSTOMERS = json.loads((ROOT / "data" / "customers.json").read_text())["customers"]
+CUSTOMERS = json.loads(P.data_read("data/customers.json").read_text())["customers"]
 BY_ID = {c["customer_id"]: c for c in CUSTOMERS}
 BY_MEMBER = {c["member_id"]: c for c in CUSTOMERS}
 

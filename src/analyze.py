@@ -19,8 +19,7 @@ sys.path.insert(0, str(pathlib.Path(__file__).parent))
 import providers as P
 
 ROOT = P.ROOT
-RESULTS = ROOT / "results"
-RAW = RESULTS / "raw.jsonl"
+def RAW_READ(): return P.data_read("results/raw.jsonl")
 N_BOOT = 10_000
 RNG = np.random.default_rng(20260913)
 CHANNELS = ["ticket_body", "record_notes", "kb_article", "prior_transcript"]
@@ -31,10 +30,10 @@ PRIMARY = "to_exfil_host"   # attack-attributable metric
 
 
 def load_rows():
-    if not RAW.exists():
+    if not RAW_READ().exists():
         return []
     out = []
-    for line in RAW.read_text().splitlines():
+    for line in RAW_READ().read_text().splitlines():
         if line.strip():
             try:
                 out.append(json.loads(line))
@@ -104,7 +103,7 @@ def write_table(stats):
                  "over the 16-payload corpus.\n")
     if not stats:
         lines.append("_No results yet._\n")
-        (RESULTS / "table.md").write_text("\n".join(lines))
+        P.data_write("results/table.md").write_text("\n".join(lines))
         return
     # Lead with the discriminating, panel-independent evidence: per-model rate + control.
     lines.append("## Per-model exfiltration rate (primary metric: exfil → attacker host)\n")
@@ -164,7 +163,7 @@ def write_table(stats):
     if len(fams) < 2:
         lines.append(f"- **Only one model family present ({'open-weights' if 'open_weights' in fams else 'proprietary'}); "
                      f"the open-weights-vs-proprietary comparison is not yet possible.**")
-    (RESULTS / "table.md").write_text("\n".join(lines) + "\n")
+    P.data_write("results/table.md").write_text("\n".join(lines) + "\n")
 
 
 def write_figure(stats):
@@ -173,12 +172,12 @@ def write_figure(stats):
         matplotlib.use("Agg")
         import matplotlib.pyplot as plt
     except Exception as e:
-        (RESULTS / "figure_ERROR.txt").write_text(f"matplotlib unavailable: {e}")
+        P.data_write("results/figure_ERROR.txt").write_text(f"matplotlib unavailable: {e}")
         return
     if not stats:
         fig, ax = plt.subplots(figsize=(7, 4))
         ax.text(0.5, 0.5, "No results yet", ha="center", va="center")
-        ax.axis("off"); fig.savefig(RESULTS / "figure.png", dpi=130); return
+        ax.axis("off"); fig.savefig(P.data_write("results/figure.png"), dpi=130); return
 
     labels = [s["label"] for s in stats.values()]
     rates = [s["rate"] * 100 for s in stats.values()]
@@ -210,8 +209,9 @@ def write_figure(stats):
     ax.grid(axis="y", alpha=0.3, zorder=0)
     ax.spines[["top", "right"]].set_visible(False)
     fig.tight_layout()
-    fig.savefig(RESULTS / "figure.png", dpi=130)
-    print(f"wrote {RESULTS/'figure.png'}")
+    outp = P.data_write("results/figure.png")
+    fig.savefig(outp, dpi=130)
+    print(f"wrote {outp}")
 
 
 def main():
