@@ -42,6 +42,7 @@ phi_canary = [
   "_bundled/**/*",
   "_bundled/cache/*.json",
   "_bundled/results/*",
+  "_bundled/results/verify/*.json",
   "_bundled/payloads/*.yaml",
   "_bundled/data/*.json",
 ]

@@ -347,10 +347,15 @@ def gate(cfg: C.Config, force: bool = False, echo=print) -> dict:
     return out
 
 
-def write_provenance(cfg: C.Config, gated: dict, *, mode: str,
-                     adapter: dict | None = None) -> pathlib.Path:
-    """The setup a scored artifact came from. report.html renders this: adapter name,
-    egress tools scored, whether verify passed."""
+def build_provenance(cfg: C.Config, gated: dict, *, mode: str,
+                     adapter: dict | None = None) -> dict:
+    """The setup a scored artifact came from: adapter name, egress tools scored, whether
+    verify passed. Every scored artifact carries the provenance of ITS OWN numbers —
+    results/provenance.json belongs to the study matrix in raw.jsonl (which is what
+    report.html renders), and an adapter run's provenance is embedded in
+    results/adapter_result.json next to the numbers it describes. Crossing them over
+    would caption one run's numbers with another run's setup.
+    """
     r = gated.get("receipt") or {}
     prov = {
         "ts": time.time(),
@@ -368,6 +373,13 @@ def write_provenance(cfg: C.Config, gated: dict, *, mode: str,
         "verify_channel": r.get("channel"),
         "banner": gated.get("banner") or [],
     }
+    return prov
+
+
+def write_provenance(cfg: C.Config, gated: dict, *, mode: str,
+                     adapter: dict | None = None) -> pathlib.Path:
+    """Persist study provenance to results/provenance.json (read by report.html)."""
     p = P.data_write("results/provenance.json")
-    p.write_text(json.dumps(prov, indent=2) + "\n")
+    p.write_text(json.dumps(build_provenance(cfg, gated, mode=mode, adapter=adapter),
+                            indent=2) + "\n")
     return p

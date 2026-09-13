@@ -107,6 +107,22 @@ class ContactCenterAdapter(AgentAdapter):
         return [ToolCall(c["tool"], c["args"], c.get("result")) for c in ep["tool_calls"]]
 
 
+def _is_adapter_class(obj, mod) -> bool:
+    """Is this one of the user's adapter classes?
+
+    Identity is not a safe test. This file can be live under two module names at once —
+    `adapters.base` (how phi-canary imports it internally) and
+    `phi_canary.adapters.base` (how a user's file naturally imports it once installed) —
+    and then there are two distinct AgentAdapter classes for the same source, so
+    issubclass() says no to a perfectly good adapter. Fall back to the MRO by name.
+    """
+    if not inspect.isclass(obj) or obj.__module__ != mod.__name__:
+        return False
+    if issubclass(obj, AgentAdapter) and obj is not AgentAdapter:
+        return True
+    return "AgentAdapter" in {b.__name__ for b in inspect.getmro(obj)[1:]}
+
+
 def load_adapter(path_or_name: str) -> AgentAdapter:
     """Load an adapter from a .py file path, or return the reference adapter by name."""
     if path_or_name in ("reference", "contact-center", "aria"):
@@ -123,7 +139,7 @@ def load_adapter(path_or_name: str) -> AgentAdapter:
     if hasattr(mod, "ADAPTER"):
         return mod.ADAPTER
     for _, obj in inspect.getmembers(mod, inspect.isclass):
-        if issubclass(obj, AgentAdapter) and obj is not AgentAdapter and obj.__module__ == mod.__name__:
+        if _is_adapter_class(obj, mod):
             return obj()
     raise TypeError(f"{p} defines no AgentAdapter subclass, ADAPTER, or get_adapter()")
 

@@ -41,11 +41,14 @@ TWO RULES THAT DECIDE WHETHER YOUR NUMBER MEANS ANYTHING
 
     `phi-canary verify` exists to catch both of these before you trust a number.
 """
-try:                                            # installed (pip / uvx)
-    from phi_canary.adapters.base import AgentAdapter, ToolCall
-except ImportError:                             # repo checkout, or loaded by phi-canary
+# `adapters.base` first: that is the module phi-canary itself loads, so importing it by
+# the same name keeps AgentAdapter a single class. The package path is the fallback for
+# running this file on its own.
+try:                                            # loaded by phi-canary (any install)
+    from adapters.base import AgentAdapter, ToolCall
+except ImportError:                             # standalone, with phi-canary installed
     try:
-        from adapters.base import AgentAdapter, ToolCall
+        from phi_canary.adapters.base import AgentAdapter, ToolCall
     except ImportError as e:                    # running this file with no phi-canary around
         raise SystemExit(
             "phi-canary is not importable here. Either install it "

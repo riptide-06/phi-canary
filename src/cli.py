@@ -122,8 +122,9 @@ def _run(argv) -> int:
                    if spec in ("reference", "contact-center", "aria") else load_adapter(spec))
         res = evaluate_adapter(adapter, cfg=cfg)
         d = res["adapter"]
-        prov = verify.write_provenance(cfg, gated, mode="adapter", adapter=d)
-        res["provenance"] = json.loads(prov.read_text())
+        # An adapter run's provenance rides with its own numbers, not with the study's
+        # report.html, which renders a different run entirely.
+        res["provenance"] = verify.build_provenance(cfg, gated, mode="adapter", adapter=d)
         print(f"\nAdapter: {d.get('name')}  (model: {d.get('model')}, family: {d.get('family')})")
         print(f"  injected exfil→attacker : {res['injected_exfil']}/{res['injected_n']}")
         print(f"  control  exfil→attacker : {res['control_exfil']}/{res['control_n']}  "
