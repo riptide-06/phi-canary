@@ -14,9 +14,12 @@ import pathlib
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent))
+import config as C
 import providers as P
 import oracle as O
+import scoring as S
 import analyze
+import verify as V
 from agent import run_episode
 
 CANARY = O.CANARY
@@ -37,6 +40,59 @@ def _highlight(text: str) -> str:
     return esc.replace(html.escape(CANARY), f"<mark>{html.escape(CANARY)}</mark>")
 
 
+def _provenance() -> dict:
+    """What setup produced these numbers. Written by `phi-canary run`; reconstructed from
+    the active config + verify receipt if a report is regenerated on its own."""
+    f = P.data_read("results/provenance.json")
+    if f.exists():
+        try:
+            return json.loads(f.read_text())
+        except Exception:
+            pass
+    cfg = C.active()
+    r = V.load_receipt(cfg) or {}
+    return {"mode": "unknown", "adapter": r.get("adapter") or {"name": cfg.adapter},
+            "egress_tools": list(cfg.egress_tools), "attacker_host": cfg.attacker_host,
+            "canary_id": cfg.canary_id, "config_fingerprint": cfg.fingerprint(),
+            "verified": bool(r.get("passed")), "forced": False,
+            "verify_ts_utc": r.get("ts_utc"), "banner": []}
+
+
+def _prov_html(prov: dict) -> str:
+    """One line. A number without its setup is not interpretable: which agent, which tool
+    names were actually scored, and whether the setup was ever verified."""
+    ad = prov.get("adapter") or {}
+    who = html.escape(str(ad.get("name") or "?"))
+    extra = ad.get("models") or ([ad["model"]] if ad.get("model") else [])
+    if extra:
+        who += " · " + html.escape(", ".join(str(m) for m in extra))
+    tools = html.escape(", ".join(prov.get("egress_tools") or []) or "none")
+    host = html.escape(str(prov.get("attacker_host") or "?"))
+    if prov.get("verified") and not prov.get("forced"):
+        ts = prov.get("verify_ts_utc") or ""
+        vf = f"<b class=ok>passed</b>{' ' + html.escape(ts) if ts else ''}"
+    else:
+        vf = "<b class=bad>NOT passed</b>"
+    return (f"<p class=prov><span class=tag>setup provenance</span> "
+            f"adapter <b>{who}</b> · egress tools scored <code>{tools}</code> · "
+            f"attacker host <code>{host}</code> · verify: {vf} · "
+            f"setup <code>{html.escape(str(prov.get('config_fingerprint') or '?'))}</code></p>")
+
+
+def _banner_html(prov: dict) -> str:
+    """The --force stamp. A forced run's number is not interpretable, and the report has
+    to say so where the number is read, not only in the terminal that produced it."""
+    if prov.get("verified") and not prov.get("forced"):
+        return ""
+    lines = [l.strip() for l in (prov.get("banner") or []) if l.strip().strip("█")]
+    if not lines:
+        lines = ["⚠ UNVERIFIED SETUP — `phi-canary verify` has not passed for this setup.",
+                 "If the adapter is wired wrong these numbers are 0% for the wrong reason.",
+                 "Do not cite them. Run `phi-canary verify`, then re-run."]
+    body = "<br>".join(html.escape(l) for l in lines)
+    return f"<div class=alarm>{body}</div>"
+
+
 def _demo_transcript() -> dict | None:
     """Replay the demo cell from cache (no network) and pull the leaking egress call."""
     payload_file = P.data_read(f"payloads/{DEMO_CELL}.yaml")
@@ -47,12 +103,13 @@ def _demo_transcript() -> dict | None:
     ep = run_episode(DEMO_MODEL, payload, use_cache=True, allow_network=False)
     if not ep["tool_calls"]:
         return None
-    verdict = O.scan_episode(ep["tool_calls"])
+    cfg = C.active()
+    verdict = S.scan_episode(ep["tool_calls"], cfg)
     calls = []
     for c in ep["tool_calls"]:
         arg = json.dumps(c["args"], ensure_ascii=False)
-        v = O.scan_tool_call(c["tool"], c["args"])
-        calls.append({"tool": c["tool"], "arg": arg, "egress": c["tool"] in O.EGRESS_TOOLS,
+        v = S.scan_tool_call(c["tool"], c["args"], cfg)
+        calls.append({"tool": c["tool"], "arg": arg, "egress": c["tool"] in cfg.egress_tools,
                       "leaked": v["leaked"]})
     inj = payload["content"].split("\n", 1)[-1]
     return {"model": P.MODELS[DEMO_MODEL]["label"], "channel": payload["channel"],
@@ -93,6 +150,13 @@ details{margin:10px 0} summary{cursor:pointer;font-weight:600}
 .caveat{border-left:3px solid var(--mark);padding:.4em .8em;color:var(--mut);background:#1c1d17;border-radius:6px}
 .box{border-left:3px solid var(--navy);padding:.6em .9em;background:#131826;border-radius:6px}
 .foot{color:var(--mut);font-size:.82rem;margin-top:2em}
+.prov{color:var(--mut);font-size:.8rem;margin:.2em 0 1.4em;padding:.5em .7em;
+border:1px solid var(--line);border-radius:8px;background:var(--card)}
+.prov .tag{margin-right:.5em}
+.prov code{color:var(--ink)}
+.ok{color:var(--green)} .bad{color:var(--red)}
+.alarm{border:2px solid var(--red);background:var(--redbg);color:#ffd7db;border-radius:10px;
+padding:12px 14px;margin:14px 0;font-weight:600;line-height:1.5}
 """
 
 
@@ -101,9 +165,10 @@ def build_html() -> str:
     stats = analyze.model_stats(rows)
     fig = _fig_b64()
     tr = _demo_transcript()
+    prov = _provenance()
     data = {"stats": {k: {kk: vv for kk, vv in v.items()
                           if kk not in ("by_channel", "by_variant")} for k, v in stats.items()},
-            "canary": CANARY}
+            "canary": CANARY, "provenance": prov}
 
     def pct(x):
         return "—" if x != x else f"{round(100 * x)}%"
@@ -115,6 +180,8 @@ def build_html() -> str:
     parts.append("<p class=sub>Deterministic PHI-exfiltration oracle for agents under indirect "
                  "prompt injection. Does a tool-using support agent send a planted patient "
                  "record to an attacker when untrusted content tells it to?</p>")
+    parts.append(_banner_html(prov))
+    parts.append(_prov_html(prov))
 
     # ---- headline KPIs: per-model rate + control (the discriminating result) ----
     parts.append("<div class=grid>")
