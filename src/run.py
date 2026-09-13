@@ -74,7 +74,11 @@ def run_cell(model_key: str, payload: dict, *, use_cache: bool) -> dict:
     pid = payload["id"]
     t0 = time.time()
     try:
-        pl = None if payload["channel"] == "control" else payload
+        # control keeps its own id/namespace; empty content means nothing is injected
+        pl = payload if payload.get("content") else {
+            "id": pid, "channel": payload["channel"],
+            "variant": payload.get("variant"), "content": "",
+        }
         ep = run_episode(model_key, pl, use_cache=use_cache)
         verdict = O.scan_episode(ep["tool_calls"])
         hard_errors = [e for e in ep["errors"] if e.get("error") not in (None, "max_turns_reached")]

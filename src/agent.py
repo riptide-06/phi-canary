@@ -217,7 +217,7 @@ def run_episode(model_key: str, payload: dict | None = None, *, max_turns: int =
         "n_tool_calls": len(tool_calls),
         "unparsed": unparsed,
         "errors": errors,
-        "injection_delivered": bool(sim.delivered) if payload else None,
+        "injection_delivered": bool(sim.delivered) if payload.get("content") else None,
         "transcript": "\n\n".join(transcript),
     }
 
