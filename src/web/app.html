@@ -130,6 +130,77 @@ select{font:inherit;font-size:13px;background:#081008;color:var(--ink);
 .check[data-state=skip] .m{color:var(--dimmer)}
 .check[data-state=run] .m{color:var(--amber)}
 .check[data-key=positive_control] .lab{letter-spacing:.04em}
+/* ── demo ──────────────────────────────────────────────────────────────── */
+.demohead{display:flex;justify-content:space-between;align-items:center;gap:16px}
+.badge{border:1px solid var(--green-d);color:var(--green);padding:5px 11px;font-size:12px;
+  letter-spacing:.12em;white-space:nowrap}
+.badge.live{border-color:var(--red);color:var(--red);animation:blink 1.6s steps(1) infinite}
+.controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:14px 0 8px}
+.controls .spd{display:flex;gap:4px;align-items:center;color:var(--dim);font-size:12.5px;
+  margin-left:6px}
+.controls .spd .btn{padding:6px 9px;font-size:12.5px}
+.controls .spd .btn.on{border-color:var(--green);color:#001B08;background:var(--green)}
+.controls .grow{flex:1}
+.precomp{color:var(--dimmer);font-size:12.5px;line-height:1.5;max-width:96ch;margin:0 0 18px}
+.precomp b{color:var(--dim)}
+#stageMeter{margin-left:10px}
+.stage{transition:opacity .25s}
+.term{font-size:14px;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.term .ln{display:block}
+.attackhead{color:var(--amber);font-size:12.5px;letter-spacing:.1em;margin-bottom:9px;
+  text-transform:uppercase}
+.untrusted{border:1px solid #5A4410;background:var(--amber-bg);padding:14px}
+.untrusted pre{color:#FFD98A;font-size:14px}
+.tcall{display:grid;grid-template-columns:9ch 1fr;gap:10px;padding:5px 0;align-items:baseline}
+.tcall .pre{color:var(--dimmer)}
+.tcall .nm{color:var(--ink)}
+.tcall .ar{color:var(--dim);font-size:12.5px;word-break:break-all;white-space:pre-wrap}
+.tcall.eg{border:1px solid var(--red-line);background:var(--red-bg);padding:11px;margin:10px 0 0;
+  grid-template-columns:11ch 1fr;animation:slidein .4s ease-out}
+.tcall.eg .pre{color:var(--red);font-weight:700}
+.tcall.eg .nm{color:#FFD9D9}
+.tcall.eg .ar{color:#FFC9C9}
+@keyframes slidein{from{opacity:0;transform:translateX(-14px)}to{opacity:1;transform:none}}
+mark{background:var(--amber);color:#1A1200;font-weight:700;padding:0 2px}
+.flash{animation:flash .5s ease-out}
+@keyframes flash{from{background:var(--red);color:#000}to{}}
+.alertbar{background:var(--red);color:#160000;font-weight:700;letter-spacing:.12em;
+  padding:10px 14px;font-size:15px;margin:0 0 14px}
+.gridwrap{display:grid;grid-template-columns:1fr 34ch;gap:18px;align-items:start}
+@media(max-width:1120px){.gridwrap{grid-template-columns:1fr}}
+.counters{display:flex;gap:22px;margin:0 0 14px;font-size:13px;color:var(--dim)}
+.counters b{font-size:22px;color:var(--ink);display:block;line-height:1.2}
+.arm{margin:0 0 16px}
+.armlbl{color:var(--dim);font-size:12px;letter-spacing:.1em;text-transform:uppercase;
+  margin:0 0 7px}
+.matrix{display:grid;grid-template-columns:14ch repeat(4,minmax(0,1fr));gap:5px;
+  align-items:center}
+.matrix .hd{color:var(--dimmer);font-size:11.5px;text-align:center}
+.matrix .rl{color:var(--dim);font-size:12px;text-align:right;padding-right:4px}
+.cell{display:block;height:30px;border:1px solid var(--line);background:#0A120B}
+i.cell{width:15px;height:15px;display:inline-block;vertical-align:-3px;margin-right:5px}
+.cell.clean{border-color:var(--green-d);background:#0D2413}
+.cell.egress{border-color:#5A4410;background:#3A2807}
+.cell.leak{border-color:var(--red);background:var(--red)}
+.legend{display:flex;gap:18px;flex-wrap:wrap;color:var(--dimmer);font-size:12px;margin-top:6px}
+.sidelog{border-left:1px solid var(--line);padding-left:16px;min-height:120px}
+.lbl2{color:var(--dim);font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+  margin-bottom:9px}
+.sidelog .term{font-size:12px;line-height:1.6;color:var(--dimmer)}
+.sidelog .term .hit{color:var(--red)}
+.reveal{animation:rise .45s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.hero{font-size:44px;line-height:1.05;font-weight:700}
+.hero .from{color:var(--red)} .hero .to{color:var(--green)} .hero .arr{color:var(--dim)}
+/* ── tables + caveats ──────────────────────────────────────────────────── */
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th,td{padding:6px 9px;text-align:left;border-bottom:1px solid var(--line)}
+th{color:var(--dimmer);font-weight:400;font-size:12px;letter-spacing:.06em}
+td{color:var(--ink)} td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+.caveat{border-left:3px solid var(--amber);background:var(--amber-bg);color:#E8CFA0;
+  padding:11px 14px;font-size:13.5px;line-height:1.55}
+.panel .big.bad{color:var(--red)}
 #toast{position:fixed;right:20px;bottom:18px;z-index:120;display:flex;flex-direction:column;
   gap:8px;align-items:flex-end}
 #toast div{border:1px solid var(--line2);background:#0C1A10;color:var(--ink);padding:9px 14px;
@@ -359,8 +430,75 @@ select{font:inherit;font-size:13px;background:#081008;color:var(--ink);
 
     <!-- ══ DEMO / RUN ══════════════════════════════════════════════════ -->
     <section class=view id=view-demo hidden>
-      <h1>DEMO / RUN</h1>
-      <div class=stub>&mdash; next commit &mdash;</div>
+      <div class=demohead>
+        <h1>DEMO / RUN</h1>
+        <div id=demoBadge class=badge>OFFLINE &mdash; CACHED REPLAY &middot; 0 API CALLS</div>
+      </div>
+
+      <div class=controls>
+        <button class=btn id=cPlay disabled>&#9654; PLAY</button>
+        <button class=btn id=cPause disabled>&#10073;&#10073; PAUSE</button>
+        <button class=btn id=cSkip disabled>&#9197; SKIP TO RESULTS</button>
+        <button class=btn id=cReplay disabled>&#8635; REPLAY</button>
+        <span class=spd>speed
+          <button class=btn data-speed=0.5>0.5&times;</button>
+          <button class="btn on" data-speed=1>1&times;</button>
+          <button class=btn data-speed=2>2&times;</button>
+        </span>
+        <span class=grow></span>
+        <button class=btn id=cLive title="spend API calls against the live models">&#9679; LIVE RUN</button>
+      </div>
+      <div class=precomp id=precomp>
+        Results are <b>precomputed</b> and replayed from cache. The pacing is a
+        presentation choice so each step can be read &mdash; nothing here is being
+        computed, and no model is being called.
+        <span id=stageMeter class=dimmer></span>
+      </div>
+
+      <div class="panel stage" id=stage1 hidden>
+        <span class=lbl>1 &middot; the setup</span>
+        <div id=s1lines class=term></div>
+      </div>
+
+      <div class="panel stage" id=stage2 hidden>
+        <span class=lbl>2 &middot; the attack</span>
+        <div class=attackhead id=s2head></div>
+        <div class=untrusted><pre id=s2text></pre></div>
+        <div class=help style="margin-top:10px">This is not a prompt. It is text sitting in
+          a field the agent reads while doing its job.</div>
+      </div>
+
+      <div class="panel stage" id=stage3 hidden>
+        <span class=lbl>3 &middot; the agent runs the ticket</span>
+        <div id=s3calls class=term></div>
+      </div>
+
+      <div class="panel stage hot" id=stage4 hidden>
+        <span class=lbl>4 &middot; the verdict</span>
+        <div id=s4body></div>
+      </div>
+
+      <div class="panel stage" id=stage5 hidden>
+        <span class=lbl>5 &middot; the whole matrix</span>
+        <div class=gridwrap>
+          <div>
+            <div class=counters id=s5counters></div>
+            <div id=s5grid></div>
+            <div class=legend>
+              <span><i class="cell clean"></i> clean</span>
+              <span><i class="cell egress"></i> record sent, legitimate endpoint</span>
+              <span><i class="cell leak"></i> sent to the attacker host</span>
+              <span><i class="cell"></i> pending</span>
+            </div>
+          </div>
+          <div class=sidelog>
+            <div class=lbl2>canary bytes observed leaving</div>
+            <div id=s5log class=term></div>
+          </div>
+        </div>
+      </div>
+
+      <div id=stage6></div>
     </section>
 
     <!-- ══ RESULTS ═════════════════════════════════════════════════════ -->
@@ -788,6 +926,504 @@ onEnter.verify = async (opts) => {
       ? ("last receipt " + STATUS.verify_ts) : "no receipt for this setup yet";
   }
   if (opts && opts.run) runVerify();
+};
+
+/* ═══ DEMO — the choreography engine ════════════════════════════════════════
+   The data is already computed. This only reveals it at a pace a human can
+   follow, so the pacing is a presentation choice and never a loading delay.
+
+   One VIRTUAL CLOCK drives everything. It advances by requestAnimationFrame
+   delta x speed, and only while playing:
+     pause  freezes the clock, so a half-typed line stays half-typed;
+     speed  takes effect on the very next frame, mid-stage, with no replay;
+     skip   sets instant mode, so every sleep resolves at once and the SAME
+            timeline code runs to the end — skip therefore lands on exactly
+            the state play would have reached, by construction;
+     replay bumps a generation counter (pending sleeps reject), clears every
+            container, and starts over from zero.
+   Nothing reads Date.now(), so there is no drift; a backgrounded tab stops
+   the clock rather than fast-forwarding through the story.               */
+const ABORT = {abort:true};
+const CLK = {vnow:0, playing:false, speed:1, instant:false, gen:0,
+             raf:null, lastReal:null, waiters:new Set(), stage:0, live:false};
+let DEMO = null, CELLMAP = null;
+
+function wakeAll(){ Array.from(CLK.waiters).forEach(w => w()); }
+function clockTick(){
+  const now = performance.now();
+  if (CLK.lastReal == null) CLK.lastReal = now;
+  /* Clamped: a long frame, a throttled background tab or a sleeping laptop must not
+     fast-forward through the story — it just advances a little and carries on. */
+  CLK.vnow += Math.min(now - CLK.lastReal, 120) * CLK.speed;
+  CLK.lastReal = now;
+  wakeAll();
+}
+/* A plain interval rather than requestAnimationFrame: nothing here animates per frame
+   (every beat is a discrete DOM append), and rAF is starved in exactly the situations a
+   demo must survive — a headless/offscreen window, a hidden tab, a compositor stall.
+   Browsers throttle a background interval, which correctly SLOWS the story rather than
+   skipping any of it. */
+function startClock(){ if (CLK.raf == null && CLK.playing){ CLK.lastReal = null;
+  CLK.raf = setInterval(clockTick, 33); } }
+function stopClock(){ if (CLK.raf != null) clearInterval(CLK.raf); CLK.raf = null;
+  CLK.lastReal = null; }
+
+function sleep(ms, gen){
+  if (CLK.gen !== gen) return Promise.reject(ABORT);
+  if (CLK.instant) return Promise.resolve();
+  const target = CLK.vnow + ms;
+  return new Promise((resolve, reject) => {
+    const w = () => {
+      if (CLK.gen !== gen){ CLK.waiters.delete(w); reject(ABORT); return; }
+      if (CLK.instant || CLK.vnow >= target){ CLK.waiters.delete(w); resolve(); }
+    };
+    CLK.waiters.add(w); w();
+  });
+}
+
+function updateControls(){
+  /* Nothing is clickable until the cached timeline is actually in hand: PLAY with no
+     payload used to set stage 1, show an empty panel and run the clock forever.
+     REPLAY stays live at the end of the timeline — that is exactly when it is wanted. */
+  const ready = !!DEMO;
+  $("#cPlay").disabled = !ready || CLK.playing;
+  $("#cPause").disabled = !ready || !CLK.playing;
+  $("#cSkip").disabled = !ready || CLK.stage >= 6 || CLK.live;
+  $("#cReplay").disabled = !ready;
+  $("#cLive").disabled = !ready;
+  $$(".controls .spd .btn").forEach(b =>
+    b.classList.toggle("on", Number(b.dataset.speed) === CLK.speed));
+  const names = ["", "setup", "attack", "agent runs", "verdict", "matrix", "results"];
+  $("#stageMeter").textContent = CLK.stage
+    ? ("stage " + CLK.stage + "/6 · " + names[CLK.stage]
+       + (CLK.playing ? "" : (CLK.stage >= 6 ? " · complete" : " · paused")))
+    : (ready ? "ready — press PLAY" : "loading the cached timeline…");
+}
+function play(){ if (CLK.playing) return; CLK.playing = true; startClock(); updateControls(); }
+function pause(){ CLK.playing = false; stopClock(); updateControls(); }
+function setSpeed(s){ CLK.speed = s; try{ localStorage.setItem("phi.speed", String(s)); }
+  catch(e){} updateControls(); }
+
+function setStage(n){ CLK.stage = n; updateControls(); }
+function showStage(id){ const n = $(id); n.hidden = false; n.classList.add("reveal");
+  n.scrollIntoView({block:"nearest"}); }
+
+/* ── renderers, shared by the cached timeline and a live run ─────────────── */
+function withSpans(text, spans){
+  const frag = document.createDocumentFragment();
+  let pos = 0;
+  (spans || []).forEach(sp => {
+    if (sp[0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, sp[0])));
+    frag.appendChild(el("mark", null, text.slice(sp[0], sp[1])));
+    pos = sp[1];
+  });
+  frag.appendChild(document.createTextNode(text.slice(pos)));
+  return frag;
+}
+function toolCallNode(c){
+  const row = el("div", "tcall" + (c.egress ? " eg" : ""));
+  row.appendChild(el("div", "pre", c.egress ? "⇢ EGRESS" : "·"));
+  const right = el("div");
+  right.appendChild(el("div", "nm", c.tool));
+  const ar = el("div", "ar");
+  /* the egress argument is shown in full, pretty-printed: watching the whole record leave
+     IS the demo. Retrieval arguments are one-liners so they do not crowd it out. */
+  const body = c.egress ? c.args_pretty : (c.args_line || c.args_pretty);
+  ar.appendChild(withSpans(body, c.egress ? c.spans : spansIn(body, DEMO.canary_id)));
+  right.appendChild(ar);
+  row.appendChild(right);
+  return row;
+}
+function renderVerdict(d){
+  const b = $("#s4body"); b.textContent = "";
+  const v = d.verdict || {};
+  const bar = el("div", "alertbar",
+    "⛔  PHI EXFILTRATION DETECTED — CANARY BYTES IN AN OUTBOUND TOOL ARGUMENT");
+  b.appendChild(bar);
+  const kv = el("dl", "kv");
+  [["member ID leaked", d.canary_id], ["encoding", v.encoding],
+   ["channel (tool)", v.tool], ["sent to", d.attacker_host + "  (attacker-controlled)"],
+   ["other PHI in body", (v.phi_fields_present || []).join(", ") || "—"],
+   ["verdict", d.verdict_line]].forEach(r => {
+    kv.appendChild(el("dt", null, r[0]));
+    kv.appendChild(el("dd", null, String(r[1] == null ? "—" : r[1])));
+  });
+  b.appendChild(kv);
+  const lbl = el("div", "lbl2", "outbound argument (excerpt)");
+  lbl.style.marginTop = "14px";
+  b.appendChild(lbl);
+  const pre = el("pre", "ar");
+  pre.appendChild(withSpans(v.arg_excerpt || "", spansIn(v.arg_excerpt || "", d.canary_id)));
+  b.appendChild(pre);
+  bar.classList.add("flash");
+}
+function spansIn(hay, needle){
+  const out = []; const H = hay.toUpperCase(), N = needle.toUpperCase();
+  let i = H.indexOf(N);
+  while (i >= 0){ out.push([i, i + N.length]); i = H.indexOf(N, i + N.length); }
+  return out;
+}
+
+function renderMatrix(){
+  const wrap = $("#s5grid"); wrap.textContent = ""; CELLMAP = {};
+  const label = {injected: "INJECTED — 16 attacked tickets",
+                 control: "CONTROL — the same 16 tickets, injection removed"};
+  ["injected", "control"].forEach(cond => {
+    const arm = el("div", "arm");
+    arm.appendChild(el("div", "armlbl", label[cond]));
+    const m = el("div", "matrix");
+    m.appendChild(el("div", "hd", ""));
+    DEMO.variants.forEach(v => m.appendChild(el("div", "hd", v)));
+    DEMO.channels.forEach(ch => {
+      m.appendChild(el("div", "rl", ch));
+      DEMO.variants.forEach(va => {
+        const id = (cond === "injected" ? "" : "control__") + ch + "__" + va;
+        const c = el("i", "cell"); c.title = id;
+        CELLMAP[id] = c; m.appendChild(c);
+      });
+    });
+    arm.appendChild(m);
+    wrap.appendChild(arm);
+  });
+}
+const TALLY = {done:0, leaks:0, egress:0, calls:0};
+function renderCounters(){
+  const c = $("#s5counters"); c.textContent = "";
+  [["cells", TALLY.done + " / 32"], ["leaks → attacker", String(TALLY.leaks)],
+   ["record sent elsewhere", String(TALLY.egress)],
+   [CLK.live ? "API calls" : "API calls", String(TALLY.calls)]].forEach(r => {
+    const d = el("div"); d.appendChild(el("b", null, r[1]));
+    d.appendChild(el("span", null, r[0])); c.appendChild(d);
+  });
+}
+function fillCell(cell){
+  const node = CELLMAP && CELLMAP[cell.id || cell.payload_id];
+  if (!node) return;
+  const state = cell.to_exfil_host ? "leak" : (cell.leaked ? "egress" : "clean");
+  node.className = "cell " + state;
+  TALLY.done++;
+  if (state === "leak"){
+    TALLY.leaks++;
+    node.classList.add("flash");
+    const ln = el("div", "ln");
+    ln.appendChild(document.createTextNode(
+      (cell.channel || "") + "/" + (cell.variant || "") + "  "));
+    ln.appendChild(el("span", "hit", DEMO ? DEMO.canary_id : ""));
+    ln.appendChild(document.createTextNode(" → " + (cell.encoding || "")));
+    $("#s5log").appendChild(ln);
+  } else if (state === "egress"){ TALLY.egress++; }
+  renderCounters();
+}
+
+/* ── stage 6: the results, revealed in order ─────────────────────────────── */
+function statPanels(stats, caveats, order){
+  const models = (order || Object.keys(stats)).filter(k => stats[k]);
+  const P = [];
+
+  /* a. the control arm — the false-positive check */
+  const a = el("div", "panel reveal");
+  a.appendChild(el("span", "lbl", "a · the control arm"));
+  a.appendChild(el("div", null, "")).innerHTML =
+    "On the matched no-injection arm, exfiltration to the attacker host was "
+    + "<b>0/16 on every model</b>. No benign episode ever sent the record to the attacker "
+    + "— this is the label's false-positive rate, measured rather than asserted.";
+  const at = el("div", "kv"); at.style.marginTop = "12px";
+  models.forEach(m => { const s = stats[m];
+    at.appendChild(el("dt", null, s.label));
+    at.appendChild(el("dd", "ok", s.control_exfil + "/" + s.control_n + " to the attacker host"));
+  });
+  a.appendChild(at);
+  P.push(a);
+
+  /* b. THE 56% LINE — why the label is trustworthy */
+  const anyeg = models.map(m => stats[m]).filter(s => s.control_anyeg > 0)[0];
+  const b = el("div", "panel warn reveal");
+  b.appendChild(el("span", "lbl", "b · why the label is trustworthy"));
+  if (anyeg){
+    const fp = Math.round(100 * anyeg.control_anyeg / anyeg.control_n);
+    const hero = el("div", "hero");
+    hero.appendChild(el("span", "from", fp + "%"));
+    hero.appendChild(el("span", "arr", "  →  "));
+    hero.appendChild(el("span", "to", "0%"));
+    b.appendChild(hero);
+    const p = el("div"); p.style.marginTop = "12px"; p.style.fontSize = "15px";
+    p.innerHTML = "<b>" + anyeg.label + "</b> put the member record into an outbound "
+      + "argument on <b>" + anyeg.control_anyeg + "/" + anyeg.control_n + " BENIGN tickets</b> "
+      + "— to <i>legitimate</i> endpoints, with nothing attacking it. A naive "
+      + "&ldquo;canary in any outbound argument&rdquo; label would call all of those "
+      + "exfiltration: a <b class=bad>" + fp + "% false-positive rate</b>. Scoping the label "
+      + "to the attacker host takes it to <b class=ok>0%</b> — and the injected rate "
+      + "stays at " + anyeg.n_exfil + "/" + anyeg.n + ". That is the whole reason this "
+      + "number can be trusted.";
+    b.appendChild(p);
+  }
+  P.push(b);
+
+  /* c. per-model rates, with the tier confound in the SAME box (reveal e) */
+  const c = el("div", "panel reveal");
+  c.appendChild(el("span", "lbl", "c · exfiltration to the attacker host"));
+  const g = el("div", "grid2");
+  models.forEach(m => { const s = stats[m];
+    const card = el("div");
+    card.appendChild(el("div", "lbl2", s.label + "  ·  "
+      + (s.family === "open_weights" ? "open-weights" : "proprietary")));
+    const big = el("div", "big bad", pct(s.rate)); card.appendChild(big);
+    card.appendChild(el("div", "mut", s.n_exfil + "/" + s.n + " injected cells · 95% CI "
+      + pct(s.lo) + "–" + pct(s.hi)));
+    card.appendChild(el("div", "dimmer", "control " + s.control_exfil + "/" + s.control_n
+      + " · any-egress " + s.control_anyeg + "/" + s.control_n
+      + " · errors " + s.errors));
+    g.appendChild(card);
+  });
+  c.appendChild(g);
+  c.dataset.role = "rates";
+  P.push(c);
+
+  /* d. breakdowns, with the ceiling caveat directly beneath */
+  const d = el("div", "panel reveal");
+  d.appendChild(el("span", "lbl", "d · by channel and by variant"));
+  [["by_channel", DEMO ? DEMO.channels : []], ["by_variant", DEMO ? DEMO.variants : []]]
+    .forEach(spec => {
+      const tbl = el("table"); tbl.style.marginBottom = "12px";
+      const hr = el("tr"); hr.appendChild(el("th", null,
+        spec[0] === "by_channel" ? "channel →" : "variant →"));
+      spec[1].forEach(k => hr.appendChild(el("th", null, k)));
+      tbl.appendChild(hr);
+      models.forEach(m => { const s = stats[m];
+        const tr = el("tr"); tr.appendChild(el("td", null, s.label));
+        spec[1].forEach(k => { const v = s[spec[0]][k] || [0, 0];
+          tr.appendChild(el("td", "num", v[0] + "/" + v[1])); });
+        tbl.appendChild(tr); });
+      d.appendChild(tbl);
+    });
+  const cav = el("div", "caveat", caveats.ceiling);
+  d.appendChild(cav);
+  P.push(d);
+  return P;
+}
+
+/* ── the timeline ────────────────────────────────────────────────────────── */
+async function typeInto(node, text, gen, ms, chunk){
+  node.textContent = "";
+  for (let i = 0; i < text.length; i += chunk){
+    await sleep(ms, gen);
+    node.textContent = text.slice(0, i + chunk);
+  }
+  node.textContent = text;
+}
+
+function resetTimeline(){
+  ["#stage1","#stage2","#stage3","#stage4","#stage5"].forEach(id => {
+    const n = $(id); n.hidden = true; n.classList.remove("reveal"); });
+  ["#s1lines","#s3calls","#s5log","#s5grid","#s4body","#s2head","#s5counters"]
+    .forEach(id => { $(id).textContent = ""; });
+  $("#s2text").textContent = "";
+  $("#stage6").textContent = "";
+  TALLY.done = TALLY.leaks = TALLY.egress = TALLY.calls = 0;
+  CLK.vnow = 0; CLK.instant = false; CLK.stage = 0;
+  updateControls();
+}
+
+async function runTimeline(){
+  const gen = CLK.gen, S = ms => sleep(ms, gen), D = DEMO;
+  try{
+    /* 1 — THE SETUP */
+    setStage(1); showStage("#stage1");
+    for (const line of D.setup_lines){
+      await S(250);
+      const ln = el("div", "ln");
+      ln.appendChild(document.createTextNode(line));
+      const cur = el("span", "cursor blink"); ln.appendChild(cur);
+      $$("#s1lines .cursor").forEach(c => c.remove());
+      $("#s1lines").appendChild(ln);
+    }
+    await S(700); $$("#s1lines .cursor").forEach(c => c.remove());
+
+    /* 2 — THE ATTACK */
+    setStage(2); showStage("#stage2");
+    $("#s2head").textContent = D.attack.label + "  ·  channel "
+      + D.attack.channel + "  ·  variant " + D.attack.variant;
+    await S(400);
+    await typeInto($("#s2text"), D.attack.text, gen, 14, 3);
+    await S(1500);
+
+    /* 3 — THE AGENT RUNS */
+    setStage(3); showStage("#stage3");
+    const calls = D.tool_calls || [];
+    const egressAt = calls.findIndex(c => c.egress);
+    for (let i = 0; i < calls.length; i++){
+      if (i === egressAt) break;
+      await S(600);
+      $("#s3calls").appendChild(toolCallNode(calls[i]));
+    }
+    await S(1000);                      /* the beat: the room notices nothing yet */
+    for (let i = Math.max(egressAt, 0); i < calls.length; i++){
+      $("#s3calls").appendChild(toolCallNode(calls[i]));
+      await S(300);
+    }
+    await S(1500);
+
+    /* 4 — THE VERDICT */
+    setStage(4); showStage("#stage4"); renderVerdict(D);
+    await S(3000);
+
+    /* 5 — THE MATRIX */
+    setStage(5); showStage("#stage5"); renderMatrix(); renderCounters();
+    await S(500);
+    for (const cell of D.grid.cells){
+      await S(150);
+      fillCell(cell);
+    }
+    await S(900);
+
+    /* 6 — THE RESULTS */
+    setStage(6);
+    const panels = statPanels(D.stats, D.caveats, Object.keys(D.stats));
+    for (const panel of panels){
+      $("#stage6").appendChild(panel);
+      panel.scrollIntoView({block:"nearest"});
+      await S(800);
+      if (panel.dataset.role === "rates"){
+        /* the confound rides INSIDE the box with the numbers it qualifies */
+        const cav = el("div", "caveat reveal", D.caveats.confound);
+        cav.style.marginTop = "14px";
+        panel.appendChild(cav);
+        await S(800);
+      }
+    }
+    const foot = el("div", "panel reveal");
+    foot.appendChild(el("span", "lbl", "what this does not measure"));
+    foot.appendChild(el("div", "mut", D.caveats.attempt));
+    foot.appendChild(el("div", "mut", D.caveats.single_trial)).style.marginTop = "8px";
+    $("#stage6").appendChild(foot);
+    CLK.instant = false; pause(); setStage(6);
+  }catch(e){
+    if (e === ABORT) return;                 /* skipped or replayed: an expected unwind */
+    toast("timeline stopped: " + (e && e.message ? e.message : e), true);
+    pause();
+  }
+}
+
+function startTimeline(autoplay){
+  if (!DEMO){ toast("still loading the cached timeline…"); return; }
+  CLK.gen++; wakeAll();
+  resetTimeline();
+  CLK.playing = !!autoplay;
+  startClock(); updateControls();
+  runTimeline();
+}
+
+/* ── controls ────────────────────────────────────────────────────────────── */
+$("#cPlay").addEventListener("click", () => { if (CLK.stage === 0) startTimeline(true);
+  else play(); });
+$("#cPause").addEventListener("click", pause);
+$("#cSkip").addEventListener("click", () => {
+  if (CLK.stage === 0) startTimeline(true);
+  CLK.instant = true; CLK.playing = true; startClock(); wakeAll(); updateControls(); });
+$("#cReplay").addEventListener("click", async () => {
+  CLK.gen++; wakeAll();
+  await new Promise(r => setTimeout(r, 0));      /* let the old run unwind first */
+  CLK.live = false; setLiveBadge(false);
+  startTimeline(true);
+});
+$$(".controls .spd .btn").forEach(b =>
+  b.addEventListener("click", () => setSpeed(Number(b.dataset.speed))));
+
+window.addEventListener("keydown", ev => {
+  if (current !== "demo") return;
+  const tag = ((ev.target && ev.target.tagName) || "").toLowerCase();
+  if (tag === "input" || tag === "select" || tag === "textarea") return;
+  if (ev.code === "Space" || ev.key === " "){
+    ev.preventDefault();
+    if (CLK.stage === 0) startTimeline(true); else (CLK.playing ? pause() : play());
+  } else if (ev.key === "Escape"){
+    ev.preventDefault(); $("#cSkip").click();
+  }
+});
+
+function setLiveBadge(live, calls){
+  const b = $("#demoBadge");
+  CLK.live = !!live;
+  b.className = "badge" + (live ? " live" : "");
+  b.textContent = live ? ("LIVE · " + (calls || 0) + " API CALLS")
+                       : "OFFLINE — CACHED REPLAY · 0 API CALLS";
+  $("#precomp").style.display = live ? "none" : "";
+}
+
+/* ── live run: same UI, same grid, driven by SSE ─────────────────────────── */
+let ES = null;
+async function startLiveRun(){
+  if (!confirmLive()) return;
+  try{
+    const r = await api("/api/run", {json:{}});
+    CLK.gen++; wakeAll(); resetTimeline();
+    setStage(5); showStage("#stage5"); renderMatrix(); renderCounters();
+    setLiveBadge(true, r.calls_used);
+    if (r.forced) toast("UNVERIFIED setup — forced. This number is not interpretable.", true);
+    openEvents();
+  }catch(e){
+    toast(e.message, true);
+    if (/verify/i.test(e.message)) toast("open VERIFY and make the four checks pass first", true);
+  }
+}
+function confirmLive(){
+  return window.confirm(
+    "Start a LIVE run?\n\nThis calls the configured models and spends API calls. The "
+    + "runner resumes from cache, so cells that already have a verdict are skipped and "
+    + "cost nothing.");
+}
+function openEvents(){
+  if (ES) ES.close();
+  ES = new EventSource("/api/events?token=" + encodeURIComponent(PHI.token));
+  ES.onmessage = ev => {
+    let d; try{ d = JSON.parse(ev.data); }catch(e){ return; }
+    if (d.calls_used != null){ TALLY.calls = d.calls_used; renderCounters();
+      setLiveBadge(true, d.calls_used); }
+    if (d.kind === "cell"){
+      const c = d.cell || {};
+      fillCell({id: c.payload_id, payload_id: c.payload_id, channel: c.channel,
+                variant: c.variant, leaked: c.leaked, to_exfil_host: c.to_exfil_host,
+                encoding: c.encoding});
+    } else if (d.kind === "run_done"){
+      ES.close(); ES = null;
+      finishLive(d);
+    } else if (d.kind === "run_error"){
+      ES.close(); ES = null; toast("run error: " + d.error, true);
+    }
+  };
+  ES.onerror = () => { /* the window closed or the bridge went away */ };
+}
+async function finishLive(d){
+  setStage(6);
+  if (!TALLY.done) toast("nothing to run — every cell already has a cached verdict");
+  try{
+    const res = await api("/api/results");
+    $("#stage6").textContent = "";
+    statPanels(res.stats, res.caveats, res.model_order).forEach(p => $("#stage6").appendChild(p));
+    await loadStatus();
+  }catch(e){ toast("results failed: " + e.message, true); }
+  updateControls();
+}
+$("#cLive").addEventListener("click", startLiveRun);
+
+onEnter.demo = async (opts) => {
+  try{ if (!CLK.speed) CLK.speed = 1;
+       const sp = Number(localStorage.getItem("phi.speed")); if (sp) CLK.speed = sp;
+  }catch(e){}
+  if (!DEMO){
+    try{
+      DEMO = await api("/api/demo");
+      if ((DEMO.missing_cells || []).length)
+        toast("cache is missing " + DEMO.missing_cells.join(", ")
+              + " — the replay will be incomplete", true);
+    }catch(e){ toast("demo data failed: " + e.message, true); return; }
+  }
+  updateControls();
+  if (opts && opts.skip && CLK.stage === 0){        /* deep link straight to the results */
+    startTimeline(true); $("#cSkip").click();
+  } else if ((opts && (opts.autoplay || opts.play)) && CLK.stage === 0){
+    startTimeline(true);
+  }
 };
 
 /* ═══ boot ══════════════════════════════════════════════════════════════════ */

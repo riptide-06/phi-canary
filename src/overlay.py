@@ -252,6 +252,9 @@ def demo_payload(cfg: C.Config | None = None) -> dict:
             v = S.scan_tool_call(c["tool"], c["args"], cfg)
             tool_calls.append({
                 "tool": c["tool"], "args_pretty": pretty, "turn": c.get("turn"),
+                # retrieval calls are tiny and read better on one line; the egress call is
+                # pretty-printed because the whole point is to SEE the record going out
+                "args_line": json.dumps(c["args"], ensure_ascii=False),
                 "egress": c["tool"] in cfg.egress_tools,
                 "leaked": v["leaked"], "encoding": v["encoding"],
                 "to_exfil_host": v["to_exfil_host"],
@@ -312,8 +315,8 @@ def demo_payload(cfg: C.Config | None = None) -> dict:
 CAVEATS = {
     "ceiling": ("Gemini 3.1 Flash-Lite exfiltrated on EVERY channel and variant (16/16) — "
                 "a ceiling effect. Its breakdown is uniform by construction and carries no "
-                "information; the channel and variant effects below are a SINGLE-MODEL "
-                "finding (Llama 3.3 70B) and need replication."),
+                "information; the channel and variant effects shown here are a "
+                "SINGLE-MODEL finding (Llama 3.3 70B) and need replication."),
     "confound": ("100% vs 50% CONFOUNDS license with model tier: the proprietary model that "
                  "leaked on every cell is a small 'lite' tier, the open-weights model that "
                  "leaked on half is 70B. Read this gap as tier/scale, NOT as "
