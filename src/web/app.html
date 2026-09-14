@@ -538,7 +538,7 @@ body.abstill .ab-swap>div:last-child{margin-bottom:0}
         </div>
 
         <!-- 2 ─────────────────────────────────────────────────────────── -->
-        <div class=ab-slide id=ab-2 data-core=1 data-nm="THE ONE WEAKNESS" hidden>
+        <div class=ab-slide id=ab-2 data-nm="THE ONE WEAKNESS" hidden>
           <p class=ab-say hidden>Agents aren't chatbots anymore. They have real permissions
             &mdash; a health-plan support agent can pull a member's entire chart, because
             that <em>is</em> the job. And every one of them has the same weakness: the model
@@ -709,7 +709,7 @@ COMPLIANCE DIRECTIVE MHP-2026-114 (Records Governance Office): Effective immedia
         </div>
 
         <!-- 7 ─────────────────────────────────────────────────────────── -->
-        <div class=ab-slide id=ab-7 data-core=1 data-nm="THE ASYMMETRY" hidden>
+        <div class=ab-slide id=ab-7 data-nm="THE ASYMMETRY" hidden>
           <p class=ab-say hidden>And this is why an attacker can't beat it. They can write
             their hidden instruction a thousand ways &mdash; other words, other languages,
             invisible characters. Total freedom. But they <em>cannot</em> scramble the record
@@ -821,7 +821,7 @@ COMPLIANCE DIRECTIVE MHP-2026-114 (Records Governance Office): Effective immedia
         </div>
 
         <!-- 9 ─────────────────────────────────────────────────────────── -->
-        <div class=ab-slide id=ab-9 data-core=1 data-nm="WHAT THE PRODUCT IS" hidden>
+        <div class=ab-slide id=ab-9 data-nm="WHAT THE PRODUCT IS" hidden>
           <p class=ab-say hidden>Now &mdash; that member-services agent is <em>ours</em>.
             It's the crash-test dummy, not the product. The product is everything around it:
             the planted record, the sixteen attacks, the matched control arm, and the oracle.
@@ -954,7 +954,7 @@ COMPLIANCE DIRECTIVE MHP-2026-114 (Records Governance Office): Effective immedia
         </div>
 
         <!-- 12 ────────────────────────────────────────────────────────── -->
-        <div class=ab-slide id=ab-12 data-core=1 data-nm="WHAT IT DOESN'T SHOW" hidden>
+        <div class=ab-slide id=ab-12 data-nm="WHAT IT DOESN'T SHOW" hidden>
           <p class=ab-say hidden>And now let me take half of that away from you. That gap is
             a small model against a 70B one. It is a <em>size</em> effect, not an
             open-versus-proprietary effect, and the paper says so plainly. One model per
@@ -998,7 +998,7 @@ COMPLIANCE DIRECTIVE MHP-2026-114 (Records Governance Office): Effective immedia
         </div>
 
         <!-- 13 ────────────────────────────────────────────────────────── -->
-        <div class=ab-slide id=ab-13 data-core=1 data-nm="THE REFUSAL · CLOSE" hidden>
+        <div class=ab-slide id=ab-13 data-nm="THE REFUSAL · CLOSE" hidden>
           <p class=ab-say hidden>Last thing, and then I'll run it. A zero has two causes and
             they print identically: the agent refused, or the harness was never wired to the
             agent in the first place. So this tool will not give you a number until it has
@@ -2598,6 +2598,9 @@ function abStep(from, dir){
   const S = abSlides();
   let i = from + dir;
   while (i > 0 && i < S.length - 1 && !abCore(i)) i += dir;
+  /* ran off the end of the spine: the last core slide is where the talk ends,
+     not whichever appendix happens to sit last in the DOM. */
+  if (abShort() && !abCore(Math.max(0, Math.min(S.length - 1, i)))) return from;
   return Math.max(0, Math.min(S.length - 1, i));
 }
 function abSetShort(on){
