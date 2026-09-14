@@ -516,8 +516,9 @@ body.abstill .ab-swap>div:last-child{margin-bottom:0}
 
         <!-- 1 ─────────────────────────────────────────────────────────── -->
         <div class="ab-slide ab-title" id=ab-1 data-core=1 data-nm="THE INSTRUMENT" hidden>
-          <p class=ab-say hidden>Before I run anything &mdash; thirty seconds on what you're
-            about to watch, and why the number at the end can be trusted.</p>
+          <p class=ab-say hidden>I'm a researcher, and this builds on my previous paper,
+            currently under review. Before I run anything &mdash; thirty seconds on what
+            you're about to watch, and why the number at the end can be trusted.</p>
           <div class=mark style="--d:0s">&#934;</div>
           <div class=nm2 style="--d:.1s">PHI-CANARY</div>
           <div class=one style="--d:.2s">A crash test for AI agents. Point it at an agent and
@@ -530,7 +531,10 @@ body.abstill .ab-swap>div:last-child{margin-bottom:0}
             <span class="tag ok">0 false positives</span>
             <span class=tag>no LLM judge</span>
           </div>
-          <div class=go style="--d:.45s">PRESS &rarr; TO BEGIN</div>
+          <div class=one style="--d:.38s;font-size:clamp(12.5px,1.05vw,15px);
+            color:var(--dim)">Built on my previous paper, currently under review.
+            Every line of the instrument in this repo was written today.</div>
+          <div class=go style="--d:.48s">PRESS &rarr; TO BEGIN</div>
         </div>
 
         <!-- 2 ─────────────────────────────────────────────────────────── -->
@@ -1070,11 +1074,12 @@ trusting any result.</pre>
                 show is that the instrument separates two deployed models by 50 points with
                 clean controls on both sides.</p></div>
             <div class=ab-qa><p class=q>&ldquo;How much of this was built today?&rdquo;</p>
-              <p class=a><b>All of it.</b> First commit 11:10, last 16:05 &mdash; the oracle,
-                the corpus, the agent, the control arm, the verifier, the report and every
-                number. The detector hasn't been touched since 11:19; the 64 scored cells and
-                the 21 tests all run against that same frozen file. Solo, on free tiers,
-                through four dead providers.</p></div>
+              <p class=a>The <b>research</b> it builds on is my own previous paper, currently
+                <b>under review</b>. The <b>instrument</b> is all today: first commit 11:10,
+                last 17:25 &mdash; the oracle, the corpus, the agent, the control arm, the
+                verifier, the report and every number. The detector hasn't been touched since
+                11:19; the 64 scored cells and the 21 tests all run against that same frozen
+                file. Solo, on free tiers, through four dead providers.</p></div>
             <div class=ab-qa><p class=q>&ldquo;How is this different from an injection
               benchmark that uses an LLM judge?&rdquo;</p>
               <p class=a>A judge returns an opinion, priced per call, that moves between runs.
@@ -1116,6 +1121,13 @@ trusting any result.</pre>
               <p class=a>Yes, and it needs no keys to see the shipped result:
                 <code>uvx --from . phi-canary demo</code> replays from cache in about three
                 seconds. It isn't on PyPI yet, so installing is from a clone today.</p></div>
+            <div class=ab-qa><p class=q>&ldquo;What's the relationship to your
+              paper?&rdquo;</p>
+              <p class=a>I'm a researcher; this line of work is my previous paper, currently
+                under review, so I can't circulate it here. What's new today is the
+                <b>instrument</b>: the deterministic canary oracle, the 16-payload corpus, the
+                matched control arm, and the measured false-positive result that made me scope
+                the label to the attacker's host.</p></div>
             <div class=ab-qa><p class=q>&ldquo;What would you do next?&rdquo;</p>
               <p class=a>A same-tier comparison to break the size confound, multiple trials
                 per cell for real intervals, native function calling instead of
