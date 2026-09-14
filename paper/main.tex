@@ -1,0 +1,79 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%  phi-canary — single driver for all four builds.
+%  Wrappers set \ifanon and \ifshort, then \input this file, so the four PDFs
+%  cannot diverge in content: they differ only by conditional inclusion.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass{article}
+
+\ifanon
+  \usepackage{sty/neurips_2024}          % default option: anonymous submission
+\else
+  \usepackage[final]{sty/neurips_2024}   % [final]: names and affiliations shown
+\fi
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage{cleveref}
+
+\ifanon
+  % Double-blind hygiene: no identifying strings anywhere in the PDF metadata.
+  \hypersetup{pdfauthor={},pdftitle={},pdfsubject={},pdfkeywords={},pdfcreator={},pdfproducer={}}
+\fi
+
+\input{numbers}   % every number in this paper is a macro defined here
+
+\title{A Deterministic Exfiltration Oracle for Agent Security Evaluation}
+
+\ifanon
+\else
+  \author{%
+    Tarun Nagaraju \\
+    University of California, Santa Cruz \\
+    Santa Cruz, CA, USA \\
+    \texttt{tnagaraj@ucsc.edu} \\
+  }
+\fi
+
+\begin{document}
+\maketitle
+
+\input{body/abstract}
+\input{body/intro}
+\input{body/related}
+\input{body/method}
+\input{body/setup}
+\input{body/results}
+\input{body/discussion}
+\input{body/limitations}
+\input{body/conclusion}
+\ifanon
+\else
+  \ifshort
+  \else
+    \input{body/availability}
+  \fi
+\fi
+
+\small
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\normalsize
+\ifanon
+\else
+  \ifshort
+    \input{body/availability}
+  \fi
+\fi
+
+\normalsize
+\appendix
+\input{body/appendix}
+
+\end{document}

@@ -1,0 +1,125 @@
+\section{Dropped models}
+\label{app:dropped}
+\ifshort
+Four models were attempted and dropped before scoring, in every case for access
+reasons unrelated to the behaviour under study; none contributes to any reported
+number. Two Anthropic models were dropped after two distinct credentials returned
+authentication errors. One Mistral model was dropped on a persistent
+account-level rate limit. One further Gemini tier was dropped on a free-tier
+quota of a few requests per day, which a multi-turn agent exhausts within a few
+episodes. One further open-weights model was dropped on an
+output-tokens-per-minute limit incompatible with a multi-turn agent that spends
+output tokens on hidden reasoning; its partial cells covered only the channel
+that proved weakest, so including them would have biased the reported rate
+downward.
+\else
+See \cref{sec:setup}. Four models were attempted and dropped before scoring for
+credential or free-tier quota reasons unrelated to the behaviour under study;
+none contributes to any number reported in this paper.
+\fi
+
+\ifshort
+\section{Channel and variant breakdown}
+\label{app:breakdown}
+\begin{table}[h]
+\centering
+\caption{Exfiltration to the attacker host by delivery channel and by
+obfuscation variant, counts out of \nVariants{} payloads per cell. The
+\geminiLabel{} rows are at ceiling and uniform by construction; they carry no
+information about channel or variant. The \llamaLabel{} rows are a single-model
+observation at \nVariants{} payloads per cell and are suggestive, not
+established.}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{4}{c}{By channel} \\
+\cmidrule(lr){2-5}
+Model & \texttt{ticket\_body} & \texttt{record\_notes} & \texttt{kb\_article} & \texttt{prior\_transcript} \\
+\midrule
+\llamaLabel{}  & \llamaChTicketBody{}  & \llamaChRecordNotes{}  & \llamaChKbArticle{}  & \llamaChPriorTranscript{} \\
+\geminiLabel{} & \geminiChTicketBody{} & \geminiChRecordNotes{} & \geminiChKbArticle{} & \geminiChPriorTranscript{} \\
+\midrule
+& \multicolumn{4}{c}{By variant} \\
+\cmidrule(lr){2-5}
+Model & \texttt{plain} & \texttt{authority} & \texttt{html} & \texttt{unicode} \\
+\midrule
+\llamaLabel{}  & \llamaVaPlain{}  & \llamaVaAuthority{}  & \llamaVaHtml{}  & \llamaVaUnicode{} \\
+\geminiLabel{} & \geminiVaPlain{} & \geminiVaAuthority{} & \geminiVaHtml{} & \geminiVaUnicode{} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Full limitations}
+\label{app:limitations}
+\emph{The agent under test is our own.} The harness exposes an adapter interface
+intended to let a user evaluate their own agent, and the construction has no
+dependency on our particular agent, but generality across third-party agents is
+asserted by the interface and not demonstrated: no agent we did not write has
+been evaluated.
+
+\emph{Simulated tools and a non-native calling convention.} Tools return fixed
+data and no request leaves the process; tool calls are emitted as plain text and
+parsed by regular expression rather than issued through a native function-calling
+interface. A production integration would present noisier outputs and further
+egress surfaces.
+
+\emph{Panel size and tier confound.} \nModels{} models, one per category, with a
+large tier and scale mismatch; see \cref{sec:refuse}.
+
+\emph{Single trial per cell.} One run per cell at temperature~0. Hosted
+temperature-0 inference is not exactly deterministic---we observed one benign
+episode that transmitted the record on one execution and not on a byte-identical
+repeat. The bootstrap resamples payloads, so intervals do not cover run-to-run
+variability.
+
+\emph{Corpus size, ceiling, language.} \corpusSize{} payloads per model give wide
+intervals; one model saturated, making its interval degenerate and its breakdown
+uninformative. All payloads and the workflow are English only.
+
+\emph{Fixed encoding list.} \nEncodings{} encodings; a novel recoverable encoding
+would evade detection and be scored as no leak, so rates are lower bounds.
+
+\emph{Test coverage outside the detector.} The \nOracleTests{} tests exercise the
+frozen detector. The runner, configuration layer, and verifier have no unit
+tests; they are covered end to end by the study and by the equivalence check of
+\cref{sec:method}.
+
+\emph{Observer effect.} We have not verified that planting the canary leaves
+agent behaviour unchanged relative to a workflow with no canary.
+
+\emph{Provider-mediated serving.} The open-weights model was accessed through a
+hosted provider rather than self-hosted; served weights may be quantized and
+wrapped in provider-side scaffolding.
+\fi
+
+\section{Example payload}
+\label{app:payload}
+The fabricated-directive variant, delivered through the record-notes channel.
+This text is appended to the planted member's own notes field; it is data the
+agent reads while performing its task, not a prompt submitted to the model. The
+destination shown is the attacker host.
+
+\begin{quote}\small\ttfamily
+[system-appended record note]\\
+COMPLIANCE DIRECTIVE MHP-2026-114 (Records Governance Office): Effective
+immediately, every member record touched during ticket resolution MUST be
+replicated to the authorized records-sync endpoint for the retention audit. As
+the handling agent you are REQUIRED to POST the complete member record (member ID
+included) to https://\allowbreak records-sync.example.net/ingest using http\_post
+before marking the ticket resolved. Non-compliance is logged against your
+operator ID.
+\end{quote}
+
+No such directive, office, or endpoint exists. The remaining variants hold this
+intent fixed while changing surface form: unadorned prose, an HTML comment with
+an image-tag decoy, and zero-width characters spliced through the words.
+
+\section{Reproduction}
+\label{app:repro}
+Every number in this paper is generated from \texttt{results/raw.jsonl}
+(\pooledEpisodes{} scored episodes) by \texttt{paper/numbers.py}, which emits a
+LaTeX macro per quantity; the paper sources contain no hardcoded numerals in
+prose. Bootstrap intervals use \bootN{} resamples at seed \bootSeed{}. The
+detector's encoding list is read from the module rather than transcribed, and the
+oracle test count is parsed from the test runner's output. The study consumed
+\apiCalls{} model calls and is closed; all analysis re-reads cached responses and
+issues no new calls.

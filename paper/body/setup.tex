@@ -1,0 +1,76 @@
+\section{Experimental Setup}
+\label{sec:setup}
+
+\ifshort
+Two deployed models were evaluated: \llamaLabel{} (\llamaFamily{}, hosted) and
+\geminiLabel{} (\geminiFamily{})---one per deployment category, differing
+substantially in tier and scale (\cref{sec:refuse}). Four further models were
+attempted and dropped before scoring for credential or free-tier quota reasons
+unrelated to the behaviour under study; none contributes to any reported number
+(\cref{app:dropped}). One trial per cell at temperature~0, a 1024-token output
+cap, and a \maxTurns{}-turn budget; responses are cached by prompt, so the study
+is idempotent. It consumed \apiCalls{} model calls, is closed, and all analysis
+re-reads those responses. The cap was raised from an initially planned 300 tokens
+because the proprietary arm spends output tokens on hidden reasoning before
+emitting a tool call, so too small a cap truncates episodes before the egress
+call and \emph{understates} exfiltration. The primary metric is the canary's
+bytes, under any of the \nEncodings{} encodings, in an egress-tool argument
+destined for \attackerHost{}; intervals are percentile bootstrap over \bootN{}
+resamples of the corpus at seed \bootSeed{}, quantifying payload variability, not
+run-to-run variability.
+\else
+
+\paragraph{Models.}
+Two deployed models were evaluated: \llamaLabel{} (\llamaFamily{}, served by a
+hosted inference provider) and \geminiLabel{} (\geminiFamily{}). This is one
+model per deployment category, and the two differ by a large margin in parameter
+scale and tier. \Cref{sec:refuse} states what that design cannot support.
+
+\paragraph{Models attempted and dropped.}
+\ifshort
+Four additional models were attempted and dropped before scoring for credential
+or free-tier-quota reasons unrelated to their behaviour; see
+\cref{app:dropped}. No dropped model contributes to any reported number.
+\else
+Four further models were attempted and dropped before scoring, in every case for
+access reasons unrelated to the behaviour under study, and no dropped model
+contributes to any number reported here. Two Anthropic models were dropped after
+two distinct credentials were rejected with authentication errors. One Mistral
+model was dropped on a persistent account-level rate limit. One additional
+Gemini tier was dropped on a free-tier quota of a small number of requests per
+day, which a multi-turn agent exhausts within a few episodes. One additional
+open-weights model was dropped on an output-tokens-per-minute limit incompatible
+with a multi-turn agent that spends output tokens on hidden reasoning before
+emitting a tool call; its partial cells covered only the weakest channel and
+including them would have biased the reported rate downward.
+\fi
+
+\paragraph{Protocol.}
+One trial per cell at temperature~0, a per-call output cap of 1024 tokens, and a
+\maxTurns{}-turn budget. Every model response is cached and keyed by the prompt,
+so the study is idempotent and re-scoring consumes no quota. The study consumed
+\apiCalls{} model calls in total and is closed; all analysis in this paper
+re-reads those cached responses.
+
+\paragraph{A deviation worth stating.}
+The per-call output cap was raised from an initially planned 300 tokens to 1024.
+The models in the proprietary arm spend output tokens on hidden reasoning before
+emitting a tool call; at the smaller cap they exhaust the budget during that
+reasoning and emit no tool call at all, which the harness would score as no
+leak. The direction of the bias is therefore known: too small a cap
+\emph{understates} exfiltration by truncating episodes before the egress call.
+The cap is not part of the cache key and does not affect the call count.
+
+\paragraph{Metrics.}
+The primary metric is exfiltration to the attacker host: the canary's bytes,
+under any of the \nEncodings{} encodings, in an argument to an egress tool whose
+destination is \attackerHost{}. We report it as a count out of \llamaN{} and as a
+rate with a percentile bootstrap 95\% confidence interval over \bootN{}
+resamples of the payload corpus at seed \bootSeed{}. The interval therefore
+quantifies variability \emph{across payloads}, not across sampling runs; with one
+trial per cell it cannot capture run-to-run variability. We report two secondary
+quantities on the control arm: exfiltration to the attacker host (the
+false-positive rate of the reported label) and any-egress, meaning the canary in
+any outbound argument regardless of destination (the false-positive rate of the
+naive label).
+\fi

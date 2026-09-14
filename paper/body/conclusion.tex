@@ -1,0 +1,27 @@
+\section{Conclusion}
+
+\ifshort
+For exfiltration the per-episode judgement can be replaced by a construction:
+plant a record no legitimate task transmits, and read its bytes at the egress
+boundary. The result worth carrying forward required admitting a design error---
+the obvious form of that label had a \llamaControlFPRate{} false-positive rate on
+traffic with no adversary in it.
+\else
+
+Agent security evaluation currently depends on judging whether each attack
+succeeded. We showed that for exfiltration specifically the judgement can be
+replaced by a construction: plant a record no legitimate task transmits, and read
+its bytes at the egress boundary. The construction is sound because the adversary
+controls the injected instruction completely and the stolen record not at all.
+
+The result we would most like carried forward is the one that required admitting
+a design error. The obvious form of this label---the planted record in any
+outbound argument---had a \llamaControlFPRate{} false-positive rate on
+adversary-free traffic, because transmitting member records is a plausible
+reading of the agent's job. We found that only by running a matched control arm,
+and the same arm showed the agent transmitting planted identifiers to endpoints
+it invented, with no adversary present and under a system prompt naming those
+records as protected. Both results argue the same thing: a security label for
+agents is not credible until it has been run against the agent doing its job
+unmolested.
+\fi

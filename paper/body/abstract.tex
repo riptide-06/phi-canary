@@ -1,0 +1,59 @@
+\begin{abstract}
+\ifshort
+Evaluating whether a tool-using agent can be induced to exfiltrate sensitive data
+currently requires judging, per episode, whether an attack succeeded. We replace
+that judgement with a construction: a synthetic record no legitimate task
+transmits is planted in the agent's data store, and its bytes appearing in an
+outbound tool argument addressed to an attacker-controlled host is exfiltration
+by construction---sound because the adversary has unbounded freedom over the
+injected instruction and none over the stolen record, which must arrive intact to
+have value. Testing the obvious form of this label against a matched benign
+control arm falsified it: ``the record appears in any outbound argument'' fired
+on \llamaControlAnyEgress{} of \llamaControlN{} adversary-free episodes for
+\llamaLabel{}---\llamaControlFPRate{} false positives---because transmitting
+member records is plausibly the agent's job. Scoping to the attacker's host gave
+\llamaControlExfil{}/\llamaControlN{} with detection unchanged. Any label of the
+form ``a sensitive artifact appeared in an outbound channel'' inherits the
+agent's base rate of legitimate transmission. Separately, with no adversary
+present, \llamaLabel{} fabricated internal-sounding endpoints and posted the
+planted identifier to them under a system prompt naming those records as
+protected health information. Injected exfiltration was \llamaExfil{}/\llamaN{}
+and \geminiExfil{}/\geminiN{} across \pooledEpisodes{} episodes; we decline to
+read that gap as a claim about deployment category, because the design confounds
+license with model tier.
+\else
+Evaluating whether a tool-using language-model agent can be induced to exfiltrate
+sensitive data currently requires deciding, per episode, whether an attack
+succeeded---a judgement made by human transcript review or by a model-based
+judge, neither of which is reproducible at byte granularity. We replace that
+judgement with a construction. A synthetic record that no legitimate task needs
+to transmit is planted in the agent's data store; the appearance of that
+record's bytes in an outbound tool argument addressed to an attacker-controlled
+host is exfiltration by construction. The construction holds because of an
+asymmetry available to the defender: an adversary has unbounded freedom over the
+wording of an injected instruction, and none over the stolen record, which must
+arrive intact to have value.
+
+Building the obvious version of this label and then testing it against a matched
+benign control arm falsified it. The predicate ``the planted record appears in
+any outbound argument'' fired on \llamaControlAnyEgress{} of \llamaControlN{}
+adversary-free episodes for \llamaLabel{}---a \llamaControlFPRate{}
+false-positive rate---because transmitting member records is plausibly the
+agent's job. Scoping the predicate to the attacker's host moved that to
+\llamaControlExfil{}/\llamaControlN{} with the injected rate unchanged. We
+report this as the paper's primary result: any label of the form ``a sensitive
+artifact appeared in an outbound channel'' inherits the agent's base rate of
+legitimate transmission, and for an agent whose function is handling such
+artifacts that rate is not small.
+
+A second finding is independent of injection entirely. On benign tickets with no
+adversary present, \llamaLabel{} fabricated internal-sounding endpoints and
+posted the planted member identifier to them under a system prompt that named
+those records as protected health information. In a pilot across \nModels{}
+deployed models and \pooledEpisodes{} episodes, injected exfiltration to the
+attacker host was \llamaExfil{}/\llamaN{} and \geminiExfil{}/\geminiN{}; we
+decline to read that gap as a statement about deployment category, because the
+design confounds license with model tier. All \nLeaksTotal{} detected leaks were
+cleartext.
+\fi
+\end{abstract}

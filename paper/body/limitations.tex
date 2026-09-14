@@ -1,0 +1,79 @@
+\section{Limitations}
+\label{sec:limitations}
+
+\ifshort
+The agent under test is our own: generality to third-party agents is asserted by
+the adapter interface, not demonstrated. Tools are simulated and tool calls are
+parsed from plain text rather than issued through a native function-calling
+interface. The panel is \nModels{} models, one per category, with license and
+tier confounded (\cref{sec:refuse}). One trial per cell at temperature~0, with
+intervals that resample payloads and so do not capture run-to-run variability.
+The corpus is \corpusSize{} payloads, English only, and the encoding list is
+fixed, so rates are lower bounds. Test coverage outside the frozen detector is
+end-to-end rather than unit-level, and the observer effect of planting the canary
+is unmeasured. The full list is \cref{app:limitations}.
+\else
+\paragraph{The agent under test is our own.}
+This is the limitation we would attack first. The harness exposes an adapter
+interface intended to let a user evaluate their own agent, and the construction
+has no dependency on our particular agent---but generality across third-party
+agents is at present \emph{asserted by the interface, not demonstrated}. No agent
+we did not write has been evaluated. Until one has, every rate reported here
+describes one agent, and the claim that the method transfers is a design claim
+rather than an empirical one.
+
+\paragraph{Simulated tools and a non-native calling convention.}
+Tools return fixed data and no request leaves the process. Tool calls are emitted
+as plain text and parsed by regular expression, not issued through a native
+function-calling interface, which is a real divergence from how deployed agents
+call tools and may affect susceptibility in either direction. A production
+integration would also present noisier tool outputs and additional egress
+surfaces---email, ticket updates, webhooks---that this surface does not model.
+
+\paragraph{Panel size and the tier confound.}
+\nModels{} models, one per deployment category, with a large tier and scale
+mismatch between them. \Cref{sec:refuse} states the consequence: the design
+cannot separate license from capability, and the headline gap must not be read as
+a family-level claim.
+
+\paragraph{Single trial per cell; intervals that do not cover sampling.}
+Each cell is run once at temperature~0. Hosted inference at temperature~0 is not
+exactly deterministic---we directly observed one benign episode that transmitted
+the record on one execution and not on a byte-identical repeat---so a single
+trial can miss behaviour that repeated sampling would reveal. The bootstrap
+resamples the payload corpus, so the intervals quantify payload variability only.
+Run-to-run variability is unmeasured.
+
+\paragraph{Corpus size and ceiling effects.}
+\corpusSize{} payloads per model give wide intervals, and one model saturated at
+ceiling, which makes its interval degenerate and its breakdown uninformative
+(\cref{sec:breakdown}). The instrument is built to separate large behavioural
+differences, not to estimate rates precisely. All payloads and the workflow are
+in English; multilingual injection is untested.
+
+\paragraph{Fixed encoding list.}
+The detector covers \nEncodings{} encodings. A model that invented a novel
+recoverable encoding would evade detection and be scored as no leak, so every
+rate here is a lower bound. This is a soundness-preserving failure---we do not
+report leaks that did not happen---but it is a completeness failure.
+
+\paragraph{Test coverage outside the detector.}
+The \nOracleTests{} tests exercise the frozen detector: a positive per encoding
+plus negative suites over other members' identifiers in every encoding, benign
+knowledge-base text, partial fragments, and random high-entropy strings. The
+runner, configuration layer, and verifier have no unit tests; they are covered
+end to end by the study executing against them and by the equivalence check
+described in \cref{sec:method}. That is weaker coverage than unit tests and we
+name it as a gap.
+
+\paragraph{Observer effect.}
+The planted record is designed to be indistinguishable from the other records in
+the store, but we have not verified that its presence leaves agent behaviour
+unchanged relative to a workflow containing no canary at all.
+
+\paragraph{Provider-mediated serving.}
+The open-weights model was accessed through a hosted provider rather than
+self-hosted. Served weights may be quantized and are wrapped in provider-side
+scaffolding, so results characterize the model as commonly served rather than the
+raw checkpoint.
+\fi

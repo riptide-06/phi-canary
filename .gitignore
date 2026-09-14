@@ -11,3 +11,13 @@ venv/
 *.egg-info/
 build/
 dist/
+
+# LaTeX build products
+paper/out/*.aux
+paper/out/*.log
+paper/out/*.bbl
+paper/out/*.blg
+paper/out/*.fls
+paper/out/*.fdb_latexmk
+paper/out/*.toc
+paper/out/*.lof

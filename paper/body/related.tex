@@ -1,0 +1,50 @@
+\section{Related Work}
+
+Indirect prompt injection---placing adversarial text where a model-integrated
+application will retrieve it, rather than typing it at the model---was
+characterized by \citet{greshake2023indirect}, following earlier work on direct
+instruction-overriding attacks~\citep{perez2022ignore}. It is catalogued as the
+first entry of the OWASP list for generative-AI
+applications~\citep{owasp2025llmtop10}.
+
+\ifshort
+Benchmarks for tool-integrated agents---InjecAgent~\citep{zhan2024injecagent},
+AgentDojo~\citep{debenedetti2024agentdojo}---establish that deployed agents are
+susceptible and differ in attack and defense coverage. Our contribution is
+orthogonal: how an exfiltration event is \emph{labelled}, and what that label's
+false-positive rate is when measured on a matched benign arm rather than
+assumed.
+\else
+Two benchmarks target tool-integrated agents directly.
+InjecAgent~\citep{zhan2024injecagent} scores indirect prompt injections against
+agents across a large synthetic tool surface, separating attacks that harm the
+user from attacks that exfiltrate private data.
+AgentDojo~\citep{debenedetti2024agentdojo} provides a dynamic environment in
+which attacks and defenses are evaluated against task-specific security
+properties rather than a fixed attack list. Both establish that deployed agents
+are susceptible; both are concerned with the breadth of attacks and defenses
+covered.
+
+Our contribution is orthogonal to that axis. We do not propose new attacks, and
+our corpus (\corpusSize{} payloads) is deliberately small. What we propose is a
+property of the \emph{label}: that an exfiltration event can be defined so that
+determining it requires no judgement, and that the label's false-positive rate
+can be measured on a matched adversary-free arm instead of assumed. We are not
+aware of a prior agent-injection evaluation that reports a false-positive rate
+obtained by running the identical task distribution with every injection
+removed; \cref{sec:fp} is our argument that doing so is not optional, because the
+natural label fails that test badly.
+
+The planted-artifact idea is itself old: canary values and decoy documents are
+long-standing intrusion-detection primitives. The contribution here is not the
+canary but its use as a \emph{scoring oracle}---the observation that the
+instruction/record asymmetry makes a planted record a sound decision procedure
+for agent exfiltration, and that the decision procedure must be scoped to the
+destination to be sound in practice.
+
+The agent, workflow, and member-record schema used as the test subject follow the
+privacy-constrained contact-center setting of
+\citet{nagaraju2026compliance}, which benchmarks open-weights against
+proprietary models on contact-center tasks; that work measures task capability
+under a self-hosting constraint and does not consider adversarial input.
+\fi

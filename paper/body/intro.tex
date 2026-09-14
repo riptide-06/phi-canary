@@ -1,0 +1,118 @@
+\section{Introduction}
+
+\ifshort
+A tool-using agent reads data in order to act on it. Operator instructions and
+text encountered while working arrive through the same channel, as one
+undifferentiated token stream, with no boundary marking which span is data and
+which is an order~\citep{greshake2023indirect,perez2022ignore}. Text placed where
+the agent will read it therefore competes with the operator's instructions on
+equal terms, and the agent acts on it with its own legitimate
+credentials~\citep{owasp2025llmtop10}. Anyone deploying such an agent wants a
+number: how often does it fall for that? Producing one requires deciding, per
+attack, whether it succeeded---presently by reading transcripts or asking another
+model. Both are judgements: priced per call, moving between runs, not auditable
+by re-execution.
+
+\paragraph{The construction.}
+We remove the judgement rather than improve it. A synthetic member record,
+\canaryID{}, is planted in the agent's data store; no legitimate task transmits
+it outside the trust boundary. If those bytes appear in an argument to an egress
+tool addressed to a host the adversary controls, exfiltration occurred by
+construction. Scoring is a byte comparison over \nEncodings{} encodings, with no
+model in the path. The construction rests on an asymmetry favouring the defender:
+the adversary may write the injected \emph{instruction} in unboundedly many ways,
+and we never inspect it; they may not obfuscate the \emph{record} past
+recoverability, because a record that does not arrive intact is worthless. We
+stop watching the input, where the adversary is free, and watch the output, where
+they are not.
+
+\paragraph{A negative result that changed the design.}
+Our first label was the obvious one: the canary in any outbound argument. A
+matched control arm---the same \llamaControlN{} tickets with every injection
+removed---falsified it, firing on \llamaControlAnyEgress{} of \llamaControlN{}
+adversary-free episodes because posting member data to internal systems is a
+plausible reading of the agent's job. Requiring the attacker's host took false
+positives to \llamaControlExfil{}/\llamaControlN{} with detection unchanged. The
+generalization matters more than the repair: \emph{any} label of the form ``a
+sensitive artifact appeared in an outbound channel'' inherits the agent's base
+rate of legitimate transmission, and for an agent whose function is handling
+those artifacts that rate is not small.
+
+\noindent We contribute the label (\cref{sec:method}), its measured
+false-positive rate (\cref{sec:fp}), unprompted egress of planted identifiers
+(\cref{sec:unprompted}), a positive-control gate (\cref{sec:gate}), and a
+\nModels{}-model pilot whose family-level reading we refuse (\cref{sec:refuse}).
+\else
+
+A tool-using agent reads data in order to act on it. A support agent retrieves a
+member's record because retrieving it is the task. The defining structural
+weakness of such systems is that instructions from the operator and text
+encountered while working arrive through the same channel, as one undifferentiated
+token stream, with no boundary marking which span is data and which is an
+order~\citep{greshake2023indirect,perez2022ignore}. Text placed where the agent
+will read it therefore competes with the operator's instructions on equal
+terms, and the agent acts on it using its own legitimate
+credentials~\citep{owasp2025llmtop10}.
+
+Anyone deciding whether to deploy such an agent wants a number: how often does
+this agent fall for that? Producing one requires deciding, for each attempted
+attack, whether it succeeded. That decision is presently made by reading
+transcripts or by asking another model to judge them. Both are judgements. A
+judgement is priced per call, moves between runs, and cannot be audited by
+re-execution.
+
+\paragraph{The construction.}
+We remove the judgement rather than improve it. A synthetic member record,
+identified by the canary \canaryID{}, is planted in the agent's data store. No
+legitimate task in the workflow needs to transmit that record outside the trust
+boundary. If those exact bytes appear in an argument to an egress tool, addressed
+to a host the adversary controls, exfiltration occurred---by construction, not by
+anyone's opinion. Scoring is a byte comparison over
+\nEncodings{} recoverability-preserving encodings; no model participates.
+
+\paragraph{Why an adversary cannot evade it.}
+The construction rests on an asymmetry that favours the defender. The adversary
+may write the injected \emph{instruction} in unboundedly many ways---other
+phrasings, other languages, markup, zero-width characters---and we never inspect
+it. The adversary may \emph{not} obfuscate the \emph{record being stolen} beyond
+the point of recoverability, because a record that does not arrive intact is
+worth nothing to them. We therefore stop watching the input, where the adversary
+is free, and watch the output, where they are not.
+
+\paragraph{A negative result that changed the design.}
+Our first label was the obvious one: the canary appearing in any outbound tool
+argument. A matched control arm---the same \llamaControlN{} tickets with every
+injection removed---falsified it. On \llamaControlAnyEgress{} of
+\llamaControlN{} adversary-free episodes, \llamaLabel{} placed the planted
+member identifier in an outbound request, because posting member data to
+internal systems is a plausible reading of its job. As a detector of attacks
+that label would have been wrong \llamaControlFPRate{} of the time. Narrowing
+the predicate to require the attacker's host as the destination took the
+false-positive count to \llamaControlExfil{}/\llamaControlN{} while leaving the
+injected detection rate at \llamaExfil{}/\llamaN{}. We report the falsification
+and the repair together, because the generalization matters more than either:
+\emph{any} label of the form ``a sensitive artifact appeared in an outbound
+channel'' inherits the agent's base rate of legitimate transmission, and for an
+agent whose function is handling those artifacts that base rate is not small.
+
+\paragraph{Contributions.}
+\begin{enumerate}\itemsep2pt
+\item \textbf{A deterministic exfiltration label} for agent security evaluation,
+  founded on the instruction/record asymmetry, computed by byte matching over
+  \nEncodings{} encodings with no model in the scoring path
+  (\cref{sec:method}).
+\item \textbf{A measured, rather than asserted, false-positive rate.} A matched
+  benign control arm falsified the natural label at \llamaControlFPRate{} and
+  the host-scoped label measures \pooledControlExfil{}/\pooledControlN{} across
+  both arms (\cref{sec:fp}).
+\item \textbf{Unprompted egress of planted identifiers}, observed with no
+  adversary anywhere in the episode, under a system prompt that named the
+  records as protected health information (\cref{sec:unprompted}).
+\item \textbf{A positive-control gate} that refuses to report a score until the
+  harness has demonstrably detected a leak, because a disconnected agent
+  otherwise scores a perfect zero (\cref{sec:gate}).
+\item \textbf{A two-model pilot} whose family-level reading we explicitly refuse,
+  because the design cannot separate deployment category from model tier
+  (\cref{sec:refuse}).
+\end{enumerate}
+\fi

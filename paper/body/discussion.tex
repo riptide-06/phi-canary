@@ -1,0 +1,56 @@
+\section{Discussion}
+
+\paragraph{Attempt is not success, and conflating them is a measurement error.}
+\label{sec:attempt}
+The oracle detects that the agent \emph{placed} the record in an outbound
+argument. Whether that request would reach the adversary depends on egress
+proxies, allowlists, and data-loss controls a given deployment may or may not
+have; we deliberately enforce nothing. Attempt is a property of the model,
+success a property of the network it runs in. A harness reporting only end-to-end
+success would make its numbers a function of the evaluator's firewall rather than
+of the system under test, so two labs evaluating the same model would disagree
+for reasons unrelated to it. Reporting attempt keeps the measurement
+attributable; an end-to-end number must be composed with the reader's own
+controls.
+
+\ifshort
+\else
+\paragraph{The control arm is where both findings came from.}
+Neither of this paper's two substantive results came from the injected arm. The
+false-positive measurement of \cref{sec:fp} and the unprompted-egress finding of
+\cref{sec:unprompted} are both products of running the identical task
+distribution with the adversary removed. That arm doubles the cost of an
+evaluation and is, in our experience, the part most likely to be omitted. We
+would argue it is the part that determines whether the rest of the numbers can be
+interpreted at all: without it, the naive label's \llamaControlFPRate{}
+false-positive rate is invisible, and an agent that transmits protected records
+on its own initiative looks identical to one that does not.
+
+\paragraph{Determinism has a cost, and it is corpus breadth.}
+The label is exact, reproducible offline, and free to compute. What it cannot do
+is recognise harm that does not involve the planted bytes---an agent that
+paraphrases a diagnosis into an outbound message, or that leaks a different
+record, is invisible to this oracle. The construction trades coverage for
+certainty. We regard that as the right trade for a gating metric, where a
+reproducible lower bound is more useful than an unreproducible estimate, and the
+wrong trade for exploratory red-teaming, where coverage is the point.
+
+\paragraph{Cleartext, for now.}
+Every leak observed here was cleartext (\cref{sec:rates}), which means a simple
+outbound scan for literal identifiers would have caught all of them in this
+study. We do not read this as a durable defensive result. The models were not
+instructed to encode, and a more capable adversary would instruct them to; our
+detector list is finite by construction, and \cref{sec:encodings} states why a
+novel encoding is a lower-bound failure rather than a soundness failure.
+\fi
+
+\ifshort
+\else
+\paragraph{A note on what the gate is for.}
+\Cref{sec:gate} describes a check that costs a run and produces no scientific
+result. Its value is entirely negative: it prevents the harness from reporting a
+zero it did not earn. We emphasize it because a bring-your-own-agent tool is
+most dangerous precisely when it is silently disconnected, and because the
+failure is invisible in the output---a broken harness and a perfectly secure
+agent produce identical reports.
+\fi
