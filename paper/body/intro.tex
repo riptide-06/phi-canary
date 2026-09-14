@@ -18,10 +18,10 @@ We remove the judgement rather than improve it. A synthetic member record,
 \canaryID{}, is planted in the agent's data store; no legitimate task transmits
 it outside the trust boundary. If those bytes appear in an argument to an egress
 tool addressed to a host the adversary controls, exfiltration occurred by
-construction. Scoring is a byte comparison over \nEncodings{} encodings, with no
-model in the path. The construction rests on an asymmetry favouring the defender:
-the adversary may write the injected \emph{instruction} in unboundedly many ways,
-and we never inspect it; they may not obfuscate the \emph{record} past
+construction, and scoring is a byte comparison over \nEncodingsWord{} encodings
+with no model in the path. The construction rests on an asymmetry favouring the
+defender: the adversary may write the injected \emph{instruction} in unboundedly
+many ways and we never inspect it; they may not obfuscate the \emph{record} past
 recoverability, because a record that does not arrive intact is worthless. We
 stop watching the input, where the adversary is free, and watch the output, where
 they are not.
@@ -35,13 +35,12 @@ plausible reading of the agent's job. Requiring the attacker's host took false
 positives to \llamaControlExfil{}/\llamaControlN{} with detection unchanged. The
 generalization matters more than the repair: \emph{any} label of the form ``a
 sensitive artifact appeared in an outbound channel'' inherits the agent's base
-rate of legitimate transmission, and for an agent whose function is handling
-those artifacts that rate is not small.
+rate of legitimate transmission, which for such an agent is not small.
 
 \noindent We contribute the label (\cref{sec:method}), its measured
 false-positive rate (\cref{sec:fp}), unprompted egress of planted identifiers
 (\cref{sec:unprompted}), a positive-control gate (\cref{sec:gate}), and a
-\nModels{}-model pilot whose family-level reading we refuse (\cref{sec:refuse}).
+\nModelsWord{}-model pilot whose family-level reading we refuse (\cref{sec:refuse}).
 \else
 
 A tool-using agent reads data in order to act on it. A support agent retrieves a
@@ -68,7 +67,7 @@ legitimate task in the workflow needs to transmit that record outside the trust
 boundary. If those exact bytes appear in an argument to an egress tool, addressed
 to a host the adversary controls, exfiltration occurred---by construction, not by
 anyone's opinion. Scoring is a byte comparison over
-\nEncodings{} recoverability-preserving encodings; no model participates.
+\nEncodingsWord{} recoverability-preserving encodings; no model participates.
 
 \paragraph{Why an adversary cannot evade it.}
 The construction rests on an asymmetry that favours the defender. The adversary
@@ -99,7 +98,7 @@ agent whose function is handling those artifacts that base rate is not small.
 \begin{enumerate}\itemsep2pt
 \item \textbf{A deterministic exfiltration label} for agent security evaluation,
   founded on the instruction/record asymmetry, computed by byte matching over
-  \nEncodings{} encodings with no model in the scoring path
+  \nEncodingsWord{} encodings with no model in the scoring path
   (\cref{sec:method}).
 \item \textbf{A measured, rather than asserted, false-positive rate.} A matched
   benign control arm falsified the natural label at \llamaControlFPRate{} and

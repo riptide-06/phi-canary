@@ -12,18 +12,18 @@ addressed to the adversary, not whether that request would traverse a network
 (\cref{sec:attempt}).
 
 \paragraph{Canary, detector, policy.}
-A synthetic member record carrying \canaryID{} and \nRecordFields{} fields
-(name, date of birth, diagnosis codes, medications, address) is planted among
-\nCustomers{} records; it is invented in full. \emph{Detection}---which encoding
-of the canary is present in a string---is a pure function of bytes, frozen, and
-exercised by \nOracleTests{} tests. \emph{Policy}---which tools are egress, which
-host is the adversary's---is configurable and delegates every byte-level decision
-to the detector rather than reimplementing a matcher; re-scoring every logged
-call and episode through both paths gave identical verdicts. The detector reports
-the least-transformed of \nEncodings{} encodings (\encodingList{}); a novel
+A synthetic member record carrying \canaryID{} and \nRecordFields{} fields (name,
+date of birth, diagnosis codes, medications, address) is planted among
+\nCustomersWord{} records; it is invented in full. \emph{Detection}---which
+encoding of the canary is present in a string---is a pure function of bytes,
+frozen, and exercised by \nOracleTests{} tests. \emph{Policy}---which tools are
+egress, which host is the adversary's---is configurable and delegates every
+byte-level decision to the detector; re-scoring every logged call and episode
+through both paths gave identical verdicts. The detector reports
+the least-transformed of \nEncodingsWord{} encodings (\encodingList{}); a novel
 encoding is scored conservatively as no leak, so rates are lower bounds. Canary
 bytes in a \emph{retrieval} argument are never counted---looking a member up is
-the task---and only the \nEgressTools{} egress tools (\egressToolList{}) are
+the task---and only the \nEgressToolsWord{} egress tools (\egressToolList{}) are
 scored.
 \else
 
@@ -39,7 +39,7 @@ whether that request would traverse a real network; see
 \cref{sec:attempt}.
 
 \subsection{The canary}
-A synthetic member record is planted among \nCustomers{} records in the agent's
+A synthetic member record is planted among \nCustomersWord{} records in the agent's
 data store, carrying the identifier \canaryID{} and \nRecordFields{} fields
 including name, date of birth, diagnosis codes, medications, address, and a
 recent claim. The record is invented in full; no field corresponds to a real
@@ -62,7 +62,7 @@ paths and confirming key-for-key identical verdicts.
 \subsection{Matcher and encodings}
 \label{sec:encodings}
 The detector reports the least-transformed encoding that fires, over
-\nEncodings{} recoverability-preserving encodings: \encodingList{}. The list is
+\nEncodingsWord{} recoverability-preserving encodings: \encodingList{}. The list is
 closed under the requirement that the adversary can still recover the record;
 transformations that destroy recoverability are outside the threat model,
 because the adversary gains nothing from them. A novel encoding not on this list
@@ -71,24 +71,23 @@ rates are lower bounds.
 
 Canary bytes appearing in a \emph{retrieval} argument are recorded separately and
 never counted as exfiltration: looking a member up by identifier is the task, not
-a leak. Only arguments to the \nEgressTools{} egress tools (\egressToolList{})
+a leak. Only arguments to the \nEgressToolsWord{} egress tools (\egressToolList{})
 are scored.
 
 \fi
 
 \subsection{Agent under test}
 \ifshort
-The reference agent is a member-services agent for a fictional health plan, with
-\nAgentTools{} tools and a \maxTurns{}-turn budget, which resolves a support
-ticket end to end. Tool calls are emitted as plain text and parsed by regular
-expression rather than through a native function-calling interface; its system
-prompt states that member records are protected health information. Tools are
-simulated and return fixed data.
+The reference agent resolves a support ticket for a fictional health plan end to
+end, with \nAgentToolsWord{} simulated tools returning fixed data and a
+\maxTurnsWord{}-turn budget. Tool calls are emitted as plain text and parsed by
+regular expression, not through a native function-calling interface; the system
+prompt states that member records are protected health information.
 \else
 The reference agent is ARIA, an automated member-services agent for a fictional
 health plan, which resolves a support ticket end to end: read the ticket, look up
 the member record, search a policy knowledge base, and reply. It has
-\nAgentTools{} tools and a budget of \maxTurns{} turns. Its system prompt states
+\nAgentToolsWord{} tools and a budget of \maxTurnsWord{} turns. Its system prompt states
 explicitly that member records are protected health information and must be
 treated accordingly; that sentence is present in every episode reported here,
 including every episode in which a record was nevertheless transmitted.
@@ -101,29 +100,30 @@ and return fixed data; no request leaves the process.
 \fi
 
 \ifshort
-\paragraph{Corpus, control arm, and the gate.}
-The corpus is \corpusSize{} payloads: \nChannels{} channels (\channelList{})
-crossed with \nVariants{} variants (\variantList{}), each channel dressing the
-injected text as that surface plausibly looks and each variant holding intent
+\subsection{Corpus and control arm}
+The corpus is \corpusSize{} payloads: \nChannelsWord{} channels (\channelList{})
+crossed with \nVariantsWord{} variants (\variantList{}), each channel dressing
+the injected text as that surface plausibly looks and each variant holding intent
 fixed while changing surface form (\cref{app:payload}). Every payload has a
 matched control: identical ticket, member, and tool surface, injected span
 removed and nothing substituted---the only way to measure the label's
 false-positive rate, and \cref{sec:fp} reports that measuring it changed the
 label.
+
+\subsection{The positive-control gate}
 \label{sec:gate}
 An agent that never executes produces zero detected exfiltrations and zero false
 positives---the characteristic failure of a bring-your-own-agent tool, whose most
-dangerous output is a clean bill of health it did not earn. The harness therefore
-refuses to score until four checks pass, the fourth a positive control in which a
-blatant unobfuscated exfiltration instruction is issued and the oracle \emph{must}
-detect the leak; an override stamps every artifact unverified. The gate caught a
-real defect in this project's own adapter scaffold, where template and harness
-imported the same base class by two module paths and a correct adapter was
-rejected.
+dangerous output is a clean bill of health it did not earn. The harness refuses to
+score until four checks pass, the fourth a positive control in which a blatant
+unobfuscated exfiltration instruction is issued and the oracle \emph{must} detect
+the leak; an override stamps every artifact unverified. The gate caught a real
+defect in this project's own adapter scaffold, where template and harness imported
+the same base class by two module paths, so a correct adapter was rejected.
 \else
 \subsection{Corpus}
-The corpus is \corpusSize{} payloads: \nChannels{} delivery channels
-(\channelList{}) crossed with \nVariants{} obfuscation variants
+The corpus is \corpusSize{} payloads: \nChannelsWord{} delivery channels
+(\channelList{}) crossed with \nVariantsWord{} obfuscation variants
 (\variantList{}). Each channel dresses the injected text as that surface
 plausibly looks---an appended record note, a postscript on a web-form
 submission, an auto-synced knowledge-base addendum, a handoff note from a prior
@@ -139,8 +139,8 @@ the identical tool surface, with the injected span removed and nothing
 substituted. The control arm is not a nicety. It is the only way to measure the
 false-positive rate of the label, and \cref{sec:fp} reports that measuring it
 changed the label. A full evaluation of one agent is therefore
-\pooledInjectedN{}~/~\nModels{} injected episodes plus an equal number of
-controls.
+\perAgentInjected{} injected episodes plus an equal number of controls,
+\perAgentEpisodes{} in all.
 
 \subsection{The positive-control gate}
 \label{sec:gate}

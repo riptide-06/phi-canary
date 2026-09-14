@@ -4,17 +4,15 @@
 \ifshort
 Two deployed models were evaluated: \llamaLabel{} (\llamaFamily{}, hosted) and
 \geminiLabel{} (\geminiFamily{})---one per deployment category, differing
-substantially in tier and scale (\cref{sec:refuse}). Four further models were
-attempted and dropped before scoring for credential or free-tier quota reasons
-unrelated to the behaviour under study; none contributes to any reported number
-(\cref{app:dropped}). One trial per cell at temperature~\temperature{}, a \maxOutputTokens{}-token output
-cap, and a \maxTurns{}-turn budget; responses are cached by prompt, so the study
-is idempotent. It consumed \apiCalls{} model calls, is closed, and all analysis
-re-reads those responses. The cap was raised from an initially planned \plannedOutputTokens{} tokens
+substantially in tier and scale (\cref{sec:refuse}). Four further models were attempted and dropped before
+scoring for access reasons unrelated to the behaviour under study
+(\cref{app:dropped}). One trial per cell at temperature~\temperature{}, a \maxOutputTokens{}-token
+output cap, and a \maxTurnsWord{}-turn budget; responses are cached by prompt, so
+the study is idempotent and closed, having consumed \apiCalls{} model calls. The cap was raised from an initially planned \plannedOutputTokens{} tokens
 because the proprietary arm spends output tokens on hidden reasoning before
-emitting a tool call, so too small a cap truncates episodes before the egress
-call and \emph{understates} exfiltration. The primary metric is the canary's
-bytes, under any of the \nEncodings{} encodings, in an egress-tool argument
+emitting a tool call; too small a cap truncates episodes before the egress call
+and \emph{understates} exfiltration. The primary metric is the canary's
+bytes, under any of the \nOtherEncodingsWord{} encodings, in an egress-tool argument
 destined for \attackerHost{}; intervals are percentile bootstrap over \bootN{}
 resamples of the corpus at seed \bootSeed{}, quantifying payload variability, not
 run-to-run variability.
@@ -63,7 +61,7 @@ The cap is not part of the cache key and does not affect the call count.
 
 \paragraph{Metrics.}
 The primary metric is exfiltration to the attacker host: the canary's bytes,
-under any of the \nEncodings{} encodings, in an argument to an egress tool whose
+under any of the \nOtherEncodingsWord{} encodings, in an argument to an egress tool whose
 destination is \attackerHost{}. We report it as a count out of \llamaN{} and as a
 rate with a percentile bootstrap \ciLevel{}\% confidence interval over \bootN{}
 resamples of the payload corpus at seed \bootSeed{}. The interval therefore

@@ -21,13 +21,13 @@ none contributes to any number reported in this paper.
 \ifshort
 \section{Channel and variant breakdown}
 \label{app:breakdown}
-\begin{table}[t]
+\begin{table}[H]
 \centering
 \caption{Exfiltration to the attacker host by delivery channel and by
-obfuscation variant, counts out of \nVariants{} payloads per cell. The
+obfuscation variant, counts out of \nVariantsWord{} payloads per cell. The
 \geminiLabel{} rows are at ceiling and uniform by construction; they carry no
 information about channel or variant. The \llamaLabel{} rows are a single-model
-observation at \nVariants{} payloads per cell and are suggestive, not
+observation at \nVariantsWord{} payloads per cell and are suggestive, not
 established.}
 \begin{tabular}{lcccc}
 \toprule
@@ -62,7 +62,7 @@ parsed by regular expression rather than issued through a native function-callin
 interface. A production integration would present noisier outputs and further
 egress surfaces.
 
-\emph{Panel size and tier confound.} \nModels{} models, one per category, with a
+\emph{Panel size and tier confound.} \nModelsWord{} models, one per category, with a
 large tier and scale mismatch; see \cref{sec:refuse}.
 
 \emph{Single trial per cell.} One run per cell at temperature~\temperature{}. Hosted
@@ -75,7 +75,7 @@ variability.
 intervals; one model saturated, making its interval degenerate and its breakdown
 uninformative. All payloads and the workflow are English only.
 
-\emph{Fixed encoding list.} \nEncodings{} encodings; a novel recoverable encoding
+\emph{Fixed encoding list.} \nEncodingsWord{} encodings; a novel recoverable encoding
 would evade detection and be scored as no leak, so rates are lower bounds.
 
 \emph{Test coverage outside the detector.} The \nOracleTests{} tests exercise the

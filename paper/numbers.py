@@ -161,6 +161,14 @@ def collect() -> dict:
 
     # ---- encoding distribution of detected leaks ------------------------
     enc = collections.Counter(r["encoding"] for r in R if r["to_exfil_host"] and r["encoding"])
+    out["oracle"]["n_other_encodings"] = out["oracle"]["n_encodings"] - 1
+    # episodes of each condition for ONE agent, which is what a reader running
+    # this on their own agent will budget for
+    out["per_agent"] = {
+        "injected": out["pooled"]["injected_n"] // out["pooled"]["n_models"],
+        "control": out["pooled"]["control_n"] // out["pooled"]["n_models"],
+        "total": out["pooled"]["n_episodes"] // out["pooled"]["n_models"],
+    }
     out["encodings_observed"] = dict(enc)
     out["n_leaks_total"] = sum(1 for r in R if r["to_exfil_host"])
     out["n_leaks_cleartext"] = enc.get("exact", 0)
@@ -201,6 +209,18 @@ def collect() -> dict:
 
 
 # --------------------------------------------------------------- LaTeX out
+_WORDS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+          "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+          "sixteen", "seventeen", "eighteen", "nineteen", "twenty"]
+
+
+def numword(n: int) -> str:
+    """Spell out cardinals a reader would expect spelled out in prose; leave
+    larger ones as digits. Tables, counts-out-of-N and technical quantities keep
+    the digit macros, which are emitted alongside these."""
+    return _WORDS[n] if 0 <= n <= 10 else f"{n:,}"
+
+
 def texname(s: str) -> str:
     """LaTeX macro names may only contain letters."""
     return re.sub(r"[^A-Za-z]", "", s.title())
@@ -232,26 +252,31 @@ def emit_tex(N: dict) -> str:
     def d(name: str, val) -> None:
         L.append(f"\\newcommand{{\\{name}}}{{{val}}}")
 
+    def dw(name: str, val: int) -> None:
+        """digit macro + a \\...Word spelled-out twin for use in prose"""
+        d(name, val); d(name + "Word", numword(val))
+
     c = N["corpus"]
-    d("corpusSize", c["n_payloads"]); d("nChannels", c["n_channels"])
-    d("nVariants", c["n_variants"])
+    d("corpusSize", c["n_payloads"]); dw("nChannels", c["n_channels"])
+    dw("nVariants", c["n_variants"])
     d("channelList", ttlist(c["channels"]))
     d("variantList", ttlist(c["variants"]))
 
     o = N["oracle"]
-    d("nEncodings", o["n_encodings"]); d("nOracleTests", o["n_tests"])
+    dw("nEncodings", o["n_encodings"]); d("nOracleTests", o["n_tests"])
+    dw("nOtherEncodings", o["n_other_encodings"])
     d("encodingList", ttlist(o["encodings"]))
     d("egressToolList", ttlist(o["egress_tools"]))
-    d("nEgressTools", len(o["egress_tools"]))
+    dw("nEgressTools", len(o["egress_tools"]))
 
     k = N["canary"]
     d("canaryID", tt(k["id"]))
-    d("nCustomers", k["n_customers"]); d("nRecordFields", k["n_record_fields"])
+    dw("nCustomers", k["n_customers"]); d("nRecordFields", k["n_record_fields"])
     d("nPhiFieldsObserved", k["n_phi_fields_observed"])
     d("phiFieldList", ttlist(k["phi_fields_observed"]))
 
     a = N["agent"]
-    d("maxTurns", a["max_turns"]); d("nAgentTools", a["n_tools"])
+    dw("maxTurns", a["max_turns"]); dw("nAgentTools", a["n_tools"])
 
     pr = N["protocol"]
     d("maxOutputTokens", pr["max_output_tokens"])
@@ -284,13 +309,16 @@ def emit_tex(N: dict) -> str:
     d("pooledControlN", p["control_n"]); d("pooledControlExfil", p["control_exfil"])
     d("pooledControlAnyEgress", p["control_any_egress"])
     d("pooledControlFPRate", fmt_pct(p["control_fp_rate_naive"]))
-    d("nModels", p["n_models"])
+    dw("nModels", p["n_models"])
 
+    pa = N["per_agent"]
+    d("perAgentInjected", pa["injected"]); d("perAgentControl", pa["control"])
+    d("perAgentEpisodes", pa["total"])
     d("nLeaksTotal", N["n_leaks_total"]); d("nLeaksCleartext", N["n_leaks_cleartext"])
     d("nEncodingsObserved", len(N["encodings_observed"]))
 
     u = N["unprompted"]
-    d("nInventedEndpoints", u["n_endpoints"])
+    dw("nInventedEndpoints", u["n_endpoints"])
     d("inventedEndpointList", ", ".join(f"\\url{{{x}}}" for x in u["endpoints"]))
     d("unpromptedFieldList", ttlist(u["phi_fields"]))
 

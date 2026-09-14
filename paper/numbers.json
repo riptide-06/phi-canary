@@ -38,7 +38,8 @@
       "dns_lookup"
     ],
     "n_tests": 21,
-    "tests_pass": true
+    "tests_pass": true,
+    "n_other_encodings": 6
   },
   "canary": {
     "id": "MBR-7K2QX9-4418ZT",
@@ -205,6 +206,11 @@
     "n_episodes": 64,
     "control_fp_rate_naive": 0.28125
   },
+  "per_agent": {
+    "injected": 16,
+    "control": 16,
+    "total": 32
+  },
   "encodings_observed": {
     "exact": 24
   },
@@ -234,8 +240,8 @@
     "forced": false
   },
   "repo": {
-    "n_commits": 36,
+    "n_commits": 37,
     "first_commit": "2026-09-13 11:10",
-    "last_commit": "2026-09-14 15:32"
+    "last_commit": "2026-09-14 15:37"
   }
 }

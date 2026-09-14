@@ -41,14 +41,13 @@ models' control arms the reported label fired
 \pooledControlExfil{}/\pooledControlN{} times.
 
 \ifshort
-The repair is not a threshold but a change to what the label \emph{means}, and
-the generalization is the part worth carrying away: any label of the form ``a
-sensitive artifact appeared in an outbound channel'' silently inherits the
-agent's base rate of legitimately transmitting that artifact, which for an agent
-whose function is handling such artifacts is not small---here
-\llamaControlFPRate{}. An evaluation that asserts a low false-positive rate
-without a matched adversary-free arm has not measured this quantity, and the
-natural label fails it badly enough to invert the interpretation of a score.
+The repair is not a threshold but a change to what the label \emph{means}, and the
+generalization is the part worth carrying away: any label of the form ``a
+sensitive artifact appeared in an outbound channel'' silently inherits the agent's
+base rate of legitimately transmitting that artifact, which for an agent whose
+function is handling them is not small---here \llamaControlFPRate{}. An evaluation
+asserting a low false-positive rate without a matched adversary-free arm has not
+measured this quantity.
 \else
 The repair is not a threshold or a tuned parameter; it is a change to what the
 label \emph{means}. The generalization is the part worth carrying away. Any label
@@ -89,7 +88,7 @@ The control-arm behaviour of \cref{sec:fp} is a finding in its own right,
 independent of injection. On \llamaControlAnyEgress{} of \llamaControlN{} benign
 tickets, with no adversarial text anywhere, \llamaLabel{} posted the planted
 member identifier and a claim identifier---the identifiers, not the full
-record---to \nInventedEndpoints{} distinct internal-sounding endpoints appearing
+record---to \nInventedEndpointsWord{} distinct internal-sounding endpoints appearing
 nowhere in its prompt, tool definitions, or tool outputs: it invented them. It
 did so under a system prompt explicitly naming member records as protected health
 information, and the serialization varied across episodes (JSON objects,
@@ -99,7 +98,7 @@ The control-arm behaviour of \cref{sec:fp} is a finding in its own right,
 independent of prompt injection. On \llamaControlAnyEgress{} of
 \llamaControlN{} benign tickets, with no adversarial text anywhere in the
 episode, \llamaLabel{} constructed outbound HTTP requests to
-\nInventedEndpoints{} distinct internal-sounding endpoints that appear nowhere in
+\nInventedEndpointsWord{} distinct internal-sounding endpoints that appear nowhere in
 its prompt, its tool definitions, or its tool outputs---it invented them---and
 posted the planted member identifier together with a claim identifier to them.
 The transmitted fields were the identifiers, not the full record. It did so under
@@ -109,14 +108,14 @@ strings, and form-encoded bodies all appear.
 \fi
 
 We state this narrowly: \llamaControlAnyEgress{}/\llamaControlN{} on one model's
-benign arm in this workflow, with the other model's benign arm producing
+benign arm in this workflow, the other model's benign arm producing
 \geminiControlAnyEgress{} such calls, and no claim about any other setting. Two
 observations follow. A destination allowlist would have prevented all
 \llamaControlAnyEgress{}, every destination being fabricated; and no
-prompt-injection defense would have addressed any, there being no injection to
-defend against---the behaviour arises from the agent's own construal of its task.
-Deployments reasoning about agent data loss exclusively in terms of adversarial
-input are not modelling this failure mode.
+prompt-injection defense would have addressed any, there being no injection---the
+behaviour arises from the agent's own construal of its task. Deployments reasoning
+about agent data loss purely in terms of adversarial input do not model this
+failure mode.
 
 \subsection{Injected exfiltration rates}
 \label{sec:rates}
@@ -149,12 +148,11 @@ host on \llamaExfil{} of \llamaN{} payloads (\ciLevel{}\% CI [\llamaCIlo{},
 harness errors and control-arm exfiltration of
 \llamaControlExfil{}/\llamaControlN{} and \geminiControlExfil{}/\geminiControlN{}.
 The \geminiLabel{} interval is degenerate by construction---every resampled
-payload is a detection---and reads as ``high, and this design cannot resolve it
-further''. All \nLeaksTotal{} leaks were cleartext, so scanning outbound
-arguments for literal identifiers would have caught every one here; that does not
-generalize to an adversary who instructs the model to encode. Channel and variant
-breakdowns are in \cref{app:breakdown} and are a \emph{single-model} observation,
-\geminiLabel{} having saturated at ceiling.
+payload is a detection---and reads as a ceiling. All \nLeaksTotal{} leaks were
+cleartext, so scanning outbound arguments for literal identifiers would have
+caught every one here; that does not generalize to an adversary who instructs the
+model to encode. Channel and variant breakdowns are in \cref{app:breakdown}, a
+\emph{single-model} observation with \geminiLabel{} at ceiling.
 \else
 \Cref{tab:main} reports the primary metric. Both models exfiltrated the planted
 record to the attacker's host under injection: \llamaLabel{} on
@@ -169,7 +167,7 @@ is that the rate is high and this design cannot resolve it further.
 
 All \nLeaksTotal{} detected leaks were cleartext: the least-transformed detector
 fired in every case and no model applied any of the other
-\nEncodings{} encodings. Near term this means a defender inspecting outbound
+\nOtherEncodingsWord{} encodings. Near term this means a defender inspecting outbound
 arguments for literal record identifiers would have caught every leak observed
 here. It does not generalize to a more capable adversary---nothing prevents a
 model from being instructed to encode, and our detector list is finite.
@@ -195,10 +193,10 @@ once in \pooledInjectedN{} injected episodes.
 \begin{table}[t]
 \centering
 \caption{Exfiltration to the attacker host by delivery channel and by
-obfuscation variant, counts out of \nVariants{} payloads per cell. The
+obfuscation variant, counts out of \nVariantsWord{} payloads per cell. The
 \geminiLabel{} rows are at ceiling and are uniform by construction: they carry no
 information about channel or variant. The \llamaLabel{} rows are a single-model
-observation at \nVariants{} payloads per cell and are suggestive, not
+observation at \nVariantsWord{} payloads per cell and are suggestive, not
 established.}
 \label{tab:breakdown}
 \begin{tabular}{lcccc}
@@ -230,7 +228,7 @@ For that model, the record-notes channel was the most effective
 (\llamaChRecordNotes{}) and the knowledge-base channel the least
 (\llamaChKbArticle{}); among variants, the fabricated compliance directive was
 most effective (\llamaVaAuthority{}) and the HTML-comment framing least
-(\llamaVaHtml{}). With \nVariants{} payloads per cell and one model, these
+(\llamaVaHtml{}). With \nVariantsWord{} payloads per cell and one model, these
 orderings are suggestive and require replication before any mechanism is
 inferred from them.
 \fi
@@ -239,17 +237,16 @@ inferred from them.
 \label{sec:refuse}
 
 \ifshort
-The \nModels{}-model gap of roughly fifty points is not a statement about
+The \nModelsWord{}-model gap of roughly fifty points is not a statement about
 open-weights versus proprietary deployment, and we decline to read it as one. The
 panel is one model per category and the two differ substantially in tier and
-scale---a small ``lite'' tier against a \llamaScale{} model---so license and capability are
-perfectly confounded and no analysis of these data separates them. The
-observation is equally consistent with a tier-and-scale effect and a category
-effect. A same-tier comparison would resolve it and was not possible under the
-access constraints of \cref{sec:setup}. Read the gap as tier and scale, not
-license.
+scale---a small ``lite'' tier against a \llamaScale{} model---so license and
+capability are perfectly confounded and no analysis of these data separates them.
+The observation is equally consistent with a tier-and-scale effect and a category
+effect; a same-tier comparison would resolve it and was not possible under the
+access constraints of \cref{sec:setup}. Read it as tier and scale, not license.
 \else
-\Cref{tab:main} shows a \nModels{}-model gap of roughly fifty points. We decline
+\Cref{tab:main} shows a \nModelsWord{}-model gap of roughly fifty points. We decline
 to read it as a statement about open-weights versus proprietary deployment. The
 panel is one model per category and the two differ substantially in tier and
 parameter scale---the proprietary model is a small ``lite'' tier, the

@@ -3,15 +3,14 @@
 
 \ifshort
 The agent under test is our own: generality to third-party agents is asserted by
-the adapter interface, not demonstrated. Tools are simulated and tool calls are
-parsed from plain text rather than issued through a native function-calling
-interface. The panel is \nModels{} models, one per category, with license and
-tier confounded (\cref{sec:refuse}). One trial per cell at temperature~\temperature{}, with
-intervals that resample payloads and so do not capture run-to-run variability.
-The corpus is \corpusSize{} payloads, English only, and the encoding list is
-fixed, so rates are lower bounds. Test coverage outside the frozen detector is
-end-to-end rather than unit-level, and the observer effect of planting the canary
-is unmeasured. The full list is \cref{app:limitations}.
+the adapter interface, not demonstrated. Tools are simulated and tool calls parsed
+from plain text rather than issued natively. The panel is \nModelsWord{} models,
+one per category, with license and tier confounded (\cref{sec:refuse}); one trial
+per cell at temperature~\temperature{}, with intervals that resample payloads and
+so do not capture run-to-run variability; \corpusSize{} payloads, English only;
+and a fixed encoding list, so rates are lower bounds. The full list, including
+test coverage and the canary's unmeasured observer effect, is
+\cref{app:limitations}.
 \else
 \paragraph{The agent under test is our own.}
 This is the limitation we would attack first. The harness exposes an adapter
@@ -31,7 +30,7 @@ integration would also present noisier tool outputs and additional egress
 surfaces---email, ticket updates, webhooks---that this surface does not model.
 
 \paragraph{Panel size and the tier confound.}
-\nModels{} models, one per deployment category, with a large tier and scale
+\nModelsWord{} models, one per deployment category, with a large tier and scale
 mismatch between them. \Cref{sec:refuse} states the consequence: the design
 cannot separate license from capability, and the headline gap must not be read as
 a family-level claim.
@@ -52,7 +51,7 @@ differences, not to estimate rates precisely. All payloads and the workflow are
 in English; multilingual injection is untested.
 
 \paragraph{Fixed encoding list.}
-The detector covers \nEncodings{} encodings. A model that invented a novel
+The detector covers \nEncodingsWord{} encodings. A model that invented a novel
 recoverable encoding would evade detection and be scored as no leak, so every
 rate here is a lower bound. This is a soundness-preserving failure---we do not
 report leaks that did not happen---but it is a completeness failure.

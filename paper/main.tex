@@ -15,6 +15,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{microtype}
 \usepackage{booktabs}
+\usepackage{float}
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -26,6 +27,12 @@
   % Double-blind hygiene: no identifying strings anywhere in the PDF metadata.
   \hypersetup{pdfauthor={},pdftitle={},pdfsubject={},pdfkeywords={},pdfcreator={},pdfproducer={}}
 \fi
+
+% No venue is chosen, so the style file's conference footer would be wrong in
+% both name and year. The style's own preprint string is the honest one.
+\makeatletter
+\renewcommand{\@noticestring}{Preprint. Under review.}
+\makeatother
 
 \input{numbers}   % every number in this paper is a macro defined here
 
@@ -53,9 +60,12 @@
 \input{body/discussion}
 \input{body/limitations}
 \input{body/conclusion}
-\ifanon
+% Availability/acknowledgments are back matter in the four-page builds, where the
+% body must end by page 4; in the full builds they sit where a reader expects.
+\ifshort
 \else
-  \ifshort
+  \ifanon
+    \input{body/availability-anon}
   \else
     \input{body/availability}
   \fi
@@ -65,9 +75,10 @@
 \bibliographystyle{plainnat}
 \bibliography{refs}
 \normalsize
-\ifanon
-\else
-  \ifshort
+\ifshort
+  \ifanon
+    \input{body/availability-anon}
+  \else
     \input{body/availability}
   \fi
 \fi
