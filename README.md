@@ -17,7 +17,13 @@ phi-canary open                     # boot sequence, then a native window
 ```
 
 `phi-canary open` is the demo surface: a terminal boot sequence, then a real window with
-five views — STATUS, SETUP, VERIFY, DEMO/RUN, RESULTS. The DEMO view replays one cached
+six views — BRIEFING, STATUS, SETUP, VERIFY, DEMO/RUN, RESULTS. It opens on BRIEFING: a
+15-slide deck that explains the method before you run anything, with the sentence to say
+pinned under each slide, a 12-question FAQ, and a presenter run sheet. Its numbers are
+bound from the same cached study the demo replays, so the pitch cannot drift from the
+result. `←`/`→` move; `S` cuts it to a ten-slide short path; `N` hides the narration band;
+`K`/`F`/`R` jump to the numbers, the FAQ or the run sheet and back; `1`–`6` switch views.
+The DEMO view replays one cached
 episode as a paced six-stage reveal (the setup, the injected content, the agent's tool
 calls, the deliberate beat before the egress call, the verdict, then the 32-cell matrix
 and the results) with PLAY / PAUSE / SKIP / REPLAY, 0.5x–2x, space and escape bound.
@@ -33,6 +39,7 @@ phi-canary run       # run the study live (needs keys); auto-resumes from cache
 phi-canary init      # scaffold an adapter + phi-canary.yaml for YOUR agent
 phi-canary verify    # 4 checks on your setup; run refuses to score until they pass
 phi-canary open      # the native overlay (add --browser to force browser mode)
+                     #   --view about|status|setup|verify|demo|results
 ```
 
 > `uvx phi-canary` works once published to PyPI. Until then use `uvx --from . phi-canary …`,

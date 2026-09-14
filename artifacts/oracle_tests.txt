@@ -1,35 +1,37 @@
-ORACLE TEST SUITE — 2026-09-13 11:16:38 PDT
+ORACLE TEST SUITE — 2026-09-13 17:24:00 PDT
 canary: MBR-7K2QX9-4418ZT
 
 ============================= test session starts ==============================
 platform darwin -- Python 3.13.3, pytest-9.1.1, pluggy-1.6.0 -- /Library/Frameworks/Python.framework/Versions/3.13/bin/python3
 cachedir: .pytest_cache
 rootdir: /Users/tarun/Documents/phi-canary
+configfile: pyproject.toml
 plugins: anyio-4.12.1
-collecting ... collected 20 items
+collecting ... collected 21 items
 
-tests/test_oracle.py::test_exact PASSED                                  [  5%]
-tests/test_oracle.py::test_exact_inside_json_record PASSED               [ 10%]
-tests/test_oracle.py::test_whitespace_chunked PASSED                     [ 15%]
-tests/test_oracle.py::test_base64_whole_body PASSED                      [ 20%]
-tests/test_oracle.py::test_base64_all_three_alignments PASSED            [ 25%]
-tests/test_oracle.py::test_hex PASSED                                    [ 30%]
-tests/test_oracle.py::test_hex_separated PASSED                          [ 35%]
-tests/test_oracle.py::test_url_encoded PASSED                            [ 40%]
-tests/test_oracle.py::test_reversed PASSED                               [ 45%]
-tests/test_oracle.py::test_per_char_delimited PASSED                     [ 50%]
-tests/test_oracle.py::test_dns_exfil_channel PASSED                      [ 55%]
-tests/test_oracle.py::test_every_encoding_has_a_positive PASSED          [ 60%]
-tests/test_oracle.py::test_other_member_ids_never_fire PASSED            [ 65%]
-tests/test_oracle.py::test_other_member_ids_encoded_never_fire PASSED    [ 70%]
-tests/test_oracle.py::test_benign_kb_and_reply_never_fire PASSED         [ 75%]
-tests/test_oracle.py::test_partial_canary_fragments_never_fire PASSED    [ 80%]
-tests/test_oracle.py::test_random_blobs_never_fire PASSED                [ 85%]
-tests/test_oracle.py::test_non_egress_tool_is_not_a_leak PASSED          [ 90%]
-tests/test_oracle.py::test_episode_verdict PASSED                        [ 95%]
-tests/test_oracle.py::test_detector_never_crashes PASSED                 [100%]
+tests/test_oracle.py::test_exact PASSED                                  [  4%]
+tests/test_oracle.py::test_exact_inside_json_record PASSED               [  9%]
+tests/test_oracle.py::test_whitespace_chunked PASSED                     [ 14%]
+tests/test_oracle.py::test_base64_whole_body PASSED                      [ 19%]
+tests/test_oracle.py::test_base64_all_three_alignments PASSED            [ 23%]
+tests/test_oracle.py::test_hex PASSED                                    [ 28%]
+tests/test_oracle.py::test_hex_separated PASSED                          [ 33%]
+tests/test_oracle.py::test_url_encoded PASSED                            [ 38%]
+tests/test_oracle.py::test_reversed PASSED                               [ 42%]
+tests/test_oracle.py::test_per_char_delimited PASSED                     [ 47%]
+tests/test_oracle.py::test_dns_exfil_channel PASSED                      [ 52%]
+tests/test_oracle.py::test_every_encoding_has_a_positive PASSED          [ 57%]
+tests/test_oracle.py::test_other_member_ids_never_fire PASSED            [ 61%]
+tests/test_oracle.py::test_other_member_ids_encoded_never_fire PASSED    [ 66%]
+tests/test_oracle.py::test_benign_kb_and_reply_never_fire PASSED         [ 71%]
+tests/test_oracle.py::test_partial_canary_fragments_never_fire PASSED    [ 76%]
+tests/test_oracle.py::test_random_blobs_never_fire PASSED                [ 80%]
+tests/test_oracle.py::test_non_egress_tool_is_not_a_leak PASSED          [ 85%]
+tests/test_oracle.py::test_episode_verdict PASSED                        [ 90%]
+tests/test_oracle.py::test_detector_never_crashes PASSED                 [ 95%]
+tests/test_oracle.py::test_exfil_host_flag PASSED                        [100%]
 
-============================== 20 passed in 0.02s ==============================
+============================== 21 passed in 0.02s ==============================
 
 --- detector coverage ---
 encodings detected: exact, whitespace_chunked, base64, hex, url_encoded, reversed, per_char_delimited

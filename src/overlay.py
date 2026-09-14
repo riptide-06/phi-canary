@@ -856,9 +856,11 @@ def main(argv=None) -> int:
     ap.add_argument("--browser", action="store_true", help="force browser mode")
     ap.add_argument("--port", type=int, default=DEFAULT_PORT, help=f"default {DEFAULT_PORT}")
     ap.add_argument("--config", help=f"path to {C.CONFIG_NAME}")
-    ap.add_argument("--view", default="status",
-                    choices=["status", "setup", "verify", "demo", "results"],
-                    help="view to open on")
+    # BRIEFING first: `phi-canary open` is a presentation surface, and the deck is
+    # what you show before RUN DEMO. Everything else is one click or one digit away.
+    ap.add_argument("--view", default="about",
+                    choices=["about", "status", "setup", "verify", "demo", "results"],
+                    help="view to open on (default: about, the briefing deck)")
     ap.add_argument("--no-open", action="store_true",
                     help="serve only; print the URL and do not open anything")
     args = ap.parse_args(argv)
