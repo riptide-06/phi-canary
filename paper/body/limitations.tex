@@ -6,7 +6,7 @@ The agent under test is our own: generality to third-party agents is asserted by
 the adapter interface, not demonstrated. Tools are simulated and tool calls are
 parsed from plain text rather than issued through a native function-calling
 interface. The panel is \nModels{} models, one per category, with license and
-tier confounded (\cref{sec:refuse}). One trial per cell at temperature~0, with
+tier confounded (\cref{sec:refuse}). One trial per cell at temperature~\temperature{}, with
 intervals that resample payloads and so do not capture run-to-run variability.
 The corpus is \corpusSize{} payloads, English only, and the encoding list is
 fixed, so rates are lower bounds. Test coverage outside the frozen detector is
@@ -37,7 +37,7 @@ cannot separate license from capability, and the headline gap must not be read a
 a family-level claim.
 
 \paragraph{Single trial per cell; intervals that do not cover sampling.}
-Each cell is run once at temperature~0. Hosted inference at temperature~0 is not
+Each cell is run once at temperature~\temperature{}. Hosted inference at temperature~\temperature{} is not
 exactly deterministic---we directly observed one benign episode that transmitted
 the record on one execution and not on a byte-identical repeat---so a single
 trial can miss behaviour that repeated sampling would reveal. The bootstrap

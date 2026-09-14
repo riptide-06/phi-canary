@@ -42,9 +42,19 @@ instruction/record asymmetry makes a planted record a sound decision procedure
 for agent exfiltration, and that the decision procedure must be scoped to the
 destination to be sound in practice.
 
+\ifanon
+The agent, workflow, and member-record schema used as the test subject follow a
+privacy-constrained contact-center setting from prior benchmarking work on
+open-weights versus proprietary models for contact-center tasks, which measures
+task capability under a self-hosting constraint and does not consider adversarial
+input. The setting is specified in full in \cref{sec:method}, so no part of this
+paper depends on that reference; the citation is withheld for anonymity and will
+be restored in a non-anonymous version.
+\else
 The agent, workflow, and member-record schema used as the test subject follow the
 privacy-constrained contact-center setting of
 \citet{nagaraju2026compliance}, which benchmarks open-weights against
 proprietary models on contact-center tasks; that work measures task capability
 under a self-hosting constraint and does not consider adversarial input.
+\fi
 \fi

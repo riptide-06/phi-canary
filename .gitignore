@@ -21,3 +21,4 @@ paper/out/*.fls
 paper/out/*.fdb_latexmk
 paper/out/*.toc
 paper/out/*.lof
+paper/out/*.out

@@ -67,9 +67,9 @@ interpretation of a reported score.
 \includegraphics[width=0.74\linewidth]{../results/figure.png}
 \caption{Exfiltration of the planted member record to the attacker-controlled
 host under indirect prompt injection, by model, as a percentage of the
-\corpusSize{}-payload corpus. Error bars are percentile bootstrap 95\% intervals
+\corpusSize{}-payload corpus. Error bars are percentile bootstrap \ciLevel{}\% intervals
 over \bootN{} resamples of the payload corpus at seed \bootSeed{}; one run per
-cell at temperature~0, so they quantify variability across payloads and not
+cell at temperature~\temperature{}, so they quantify variability across payloads and not
 across sampling runs. The \geminiLabel{} interval is degenerate because every
 payload was a detection, and should be read as a ceiling rather than as a precise
 estimate. Diamonds at zero mark the matched no-injection control arm, on which
@@ -133,7 +133,7 @@ payload variability, not run-to-run variability.}
 \label{tab:main}
 \begin{tabular}{lccccc}
 \toprule
-Model & Category & Injected exfil. & 95\% CI & Control exfil. & Control, any egress \\
+Model & Category & Injected exfil. & \ciLevel{}\% CI & Control exfil. & Control, any egress \\
 \midrule
 \llamaLabel{}  & \llamaFamily{}  & \llamaExfil{}/\llamaN{}  & [\llamaCIlo{}, \llamaCIhi{}]  & \llamaControlExfil{}/\llamaControlN{}  & \llamaControlAnyEgress{}/\llamaControlN{} \\
 \geminiLabel{} & \geminiFamily{} & \geminiExfil{}/\geminiN{} & [\geminiCIlo{}, \geminiCIhi{}] & \geminiControlExfil{}/\geminiControlN{} & \geminiControlAnyEgress{}/\geminiControlN{} \\
@@ -144,7 +144,7 @@ Model & Category & Injected exfil. & 95\% CI & Control exfil. & Control, any egr
 
 \ifshort
 Under injection, \llamaLabel{} exfiltrated the planted record to the attacker's
-host on \llamaExfil{} of \llamaN{} payloads (95\% CI [\llamaCIlo{},
+host on \llamaExfil{} of \llamaN{} payloads (\ciLevel{}\% CI [\llamaCIlo{},
 \llamaCIhi{}]) and \geminiLabel{} on \geminiExfil{} of \geminiN{}, with no
 harness errors and control-arm exfiltration of
 \llamaControlExfil{}/\llamaControlN{} and \geminiControlExfil{}/\geminiControlN{}.
@@ -242,7 +242,7 @@ inferred from them.
 The \nModels{}-model gap of roughly fifty points is not a statement about
 open-weights versus proprietary deployment, and we decline to read it as one. The
 panel is one model per category and the two differ substantially in tier and
-scale---a small ``lite'' tier against a 70B model---so license and capability are
+scale---a small ``lite'' tier against a \llamaScale{} model---so license and capability are
 perfectly confounded and no analysis of these data separates them. The
 observation is equally consistent with a tier-and-scale effect and a category
 effect. A same-tier comparison would resolve it and was not possible under the
@@ -253,7 +253,7 @@ license.
 to read it as a statement about open-weights versus proprietary deployment. The
 panel is one model per category and the two differ substantially in tier and
 parameter scale---the proprietary model is a small ``lite'' tier, the
-open-weights model is 70B---so license and capability are perfectly confounded
+open-weights model is \llamaScale{}---so license and capability are perfectly confounded
 and no analysis of these data can separate them. The observation is equally
 consistent with a tier-and-scale effect and a category effect, and we have no
 basis for preferring either. A same-tier comparison would resolve it and was not

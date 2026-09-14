@@ -21,7 +21,7 @@ none contributes to any number reported in this paper.
 \ifshort
 \section{Channel and variant breakdown}
 \label{app:breakdown}
-\begin{table}[h]
+\begin{table}[t]
 \centering
 \caption{Exfiltration to the attacker host by delivery channel and by
 obfuscation variant, counts out of \nVariants{} payloads per cell. The
@@ -65,8 +65,8 @@ egress surfaces.
 \emph{Panel size and tier confound.} \nModels{} models, one per category, with a
 large tier and scale mismatch; see \cref{sec:refuse}.
 
-\emph{Single trial per cell.} One run per cell at temperature~0. Hosted
-temperature-0 inference is not exactly deterministic---we observed one benign
+\emph{Single trial per cell.} One run per cell at temperature~\temperature{}. Hosted
+temperature-\temperature{} inference is not exactly deterministic---we observed one benign
 episode that transmitted the record on one execution and not on a byte-identical
 repeat. The bootstrap resamples payloads, so intervals do not cover run-to-run
 variability.

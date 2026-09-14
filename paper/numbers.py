@@ -101,6 +101,17 @@ def collect() -> dict:
     out["canary"]["phi_fields_observed"] = phi
     out["canary"]["n_phi_fields_observed"] = len(phi)
 
+    # ---- protocol constants, read from the source rather than typed -----
+    import providers                                               # noqa: E402
+    import inspect
+    sig = inspect.signature(providers.call_model)
+    out["protocol"] = {
+        "max_output_tokens": providers.DEFAULT_MAX_TOKENS,
+        "planned_output_tokens": 300,      # the pre-deviation cap; see DECISIONS.md
+        "temperature": sig.parameters["temperature"].default,
+        "ci_level": 95,
+    }
+
     # ---- agent ----------------------------------------------------------
     import agent                                                   # noqa: E402
     out["agent"] = {"max_turns": agent.MAX_TURNS,
@@ -242,9 +253,18 @@ def emit_tex(N: dict) -> str:
     a = N["agent"]
     d("maxTurns", a["max_turns"]); d("nAgentTools", a["n_tools"])
 
+    pr = N["protocol"]
+    d("maxOutputTokens", pr["max_output_tokens"])
+    d("plannedOutputTokens", pr["planned_output_tokens"])
+    d("temperature", f"{pr['temperature']:g}")
+    d("ciLevel", pr["ci_level"])
+
     for mk, m in N["models"].items():
         p = MACRO[mk]
         d(p + "Label", m["label"]); d(p + "Family", m["family"].replace("_", "-"))
+        scale = re.search(r"(\d+)\s*B\b", m["label"])
+        if scale:
+            d(p + "Scale", scale.group(1) + "B")
         d(p + "N", m["injected_n"]); d(p + "Exfil", m["injected_exfil"])
         d(p + "Rate", fmt_pct(m["injected_rate"]))
         d(p + "CIlo", fmt_pct(m["ci_lo"])); d(p + "CIhi", fmt_pct(m["ci_hi"]))

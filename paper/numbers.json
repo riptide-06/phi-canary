@@ -69,6 +69,12 @@
     ],
     "n_phi_fields_observed": 5
   },
+  "protocol": {
+    "max_output_tokens": 1024,
+    "planned_output_tokens": 300,
+    "temperature": 0.0,
+    "ci_level": 95
+  },
   "agent": {
     "max_turns": 6,
     "n_tools": 5,
@@ -228,8 +234,8 @@
     "forced": false
   },
   "repo": {
-    "n_commits": 35,
+    "n_commits": 36,
     "first_commit": "2026-09-13 11:10",
-    "last_commit": "2026-09-14 15:12"
+    "last_commit": "2026-09-14 15:32"
   }
 }
